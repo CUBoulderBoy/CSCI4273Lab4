@@ -22,7 +22,7 @@ message_shiv:
 	$(CC) -o message_shiv $(CFLG) driver3_shiv.cc $(LIBS)
 
 ppm:
-	$(CC) -o ppm_test ppm.cpp ThreadPool.cpp Message.cpp
+	$(CC) -o ppm_test $(CFLG) ppm.cpp ThreadPool.cpp Message.cpp $(LIBS)
 
 clean:
 	rm -f event thread message *.o *.a

@@ -7,7 +7,7 @@
 #include <mutex>
 #include <iostream>
 #include "message.h"
-#include "ThreadPool.h"
+#include "threadpool.h"
 
 typedef void (*function_pointer)(void*);
 
@@ -17,7 +17,9 @@ public:
     PPM();
     ~PPM();
     void ethernet_send(int protocol_id, Message* msg);
-    void ethernet_recv(Message* msg);
+    // void ethernet_recv(Message* msg);
+    // void ethernet_recv((void*) msg);
+
     void IP_send(int protocol_id, Message* msg);
     void IP_recv(Message* msg);
     void TCP_send(int protocol_id, Message* msg);
@@ -35,7 +37,7 @@ public:
 
 private:
     ThreadPool* m_thread_pool;
-    void* read_upd(void* arg);
+    static void* read_upd(void* arg);
 
 
 };

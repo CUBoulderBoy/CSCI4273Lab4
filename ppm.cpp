@@ -3,6 +3,14 @@
 #include <sys/socket.h>
 #include "updsocket.cpp"
 
+void ethernet_recv(void* msg);
+
+void ethernet_recv(void* msg)
+{
+
+}
+
+
 void* PPM::read_upd(void* arg)
 {
     PPM* ppm = (PPM*) arg;
@@ -18,7 +26,7 @@ void* PPM::read_upd(void* arg)
         len = sizeof(cliaddr);
         n = recvfrom(upd_sock, mesg_buf, 1024, 0, (struct sockaddr *)&cliaddr, &len);
         Message* msg = new Message(mesg_buf, n);
-        ppm->m_thread_pool->dispatch_thread(PPM::ethernet_recv, msg);
+        ppm->m_thread_pool->dispatch_thread(ethernet_recv, (void*) msg);
     }
 }
 
@@ -45,10 +53,11 @@ void PPM::ethernet_send(int protocol_id, Message* msg)
 
 }
 
-void PPM::ethernet_recv(Message* msg)
-{
+// void PPM::ethernet_recv(Message* msg)
+// void PPM::ethernet_recv((void*) msg)
+// {
 
-}
+// }
 
 void PPM::IP_send(int protocol_id, Message* msg)
 {
