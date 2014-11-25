@@ -10,35 +10,85 @@
 
 using namespace std;
 
+struct pipe_unit {
+    int protocol_id;
+    Message *msg;
+};
+
 PPP::PPP()
 {
     // Create pipes for threads
-    pipe(ftp_to_tcp);
-    pipe(tcp_to_ftp);
-    pipe(app_to_ftp);
-    pipe(tel_to_tcp);
-    pipe(tcp_to_tel);
-    pipe(app_to_tel);
-    pipe(rdp_to_udp);
-    pipe(udp_to_rdp);
-    pipe(app_to_rdp);
-    pipe(dns_to_udp);
-    pipe(udp_to_dns);
-    pipe(app_to_dns);
-    pipe(tcp_to_ip);
-    pipe(ip_to_tcp);
-    pipe(udp_to_ip);
-    pipe(ip_to_udp);
-    pipe(ip_to_eth);
-    pipe(eth_to_ip);
-    pipe(net_to_eth);
+    pipe(ftp_send_pipe.pipe_d);
+    pipe(ftp_recv_pipe.pipe_d);
+
+    pipe(tel_send_pipe.pipe_d);
+    pipe(tel_recv_pipe.pipe_d);
+
+    pipe(tcp_send_pipe.pipe_d);
+    pipe(tcp_recv_pipe.pipe_d);
+
+    pipe(rdp_send_pipe.pipe_d);
+    pipe(rdp_recv_pipe.pipe_d);
+
+    pipe(udp_send_pipe.pipe_d);
+    pipe(udp_recv_pipe.pipe_d);
+
+    pipe(dns_send_pipe.pipe_d);
+    pipe(dns_recv_pipe.pipe_d);
+
+    pipe(eth_send_pipe.pipe_d);
+    pipe(eth_recv_pipe.pipe_d);
+
+    pipe(ip_send_pipe.pipe_d);
+    pipe(ip_recv_pipe.pipe_d);
+
+    // Initialize mutex locks on pipes
+    pthread_mutex_t ftp_send_mut = PTHREAD_MUTEX_INITIALIZER;
+    ftp_send_pipe.pipe_mutex = &ftp_send_mut;
+    pthread_mutex_t ftp_recv_mut = PTHREAD_MUTEX_INITIALIZER;
+    ftp_recv_pipe.pipe_mutex = &ftp_recv_mut;
+
+    pthread_mutex_t tel_send_mut = PTHREAD_MUTEX_INITIALIZER;
+    tel_send_pipe.pipe_mutex = &tel_send_mut;
+    pthread_mutex_t tel_recv_mut = PTHREAD_MUTEX_INITIALIZER;
+    tel_recv_pipe.pipe_mutex = &tel_recv_mut;
+
+    pthread_mutex_t rdp_send_mut = PTHREAD_MUTEX_INITIALIZER;
+    rdp_send_pipe.pipe_mutex = &rdp_send_mut;
+    pthread_mutex_t rdp_recv_mut = PTHREAD_MUTEX_INITIALIZER;
+    rdp_recv_pipe.pipe_mutex = &rdp_recv_mut;
+
+    pthread_mutex_t dns_send_mut = PTHREAD_MUTEX_INITIALIZER;
+    dns_send_pipe.pipe_mutex = &dns_send_mut;
+    pthread_mutex_t dns_recv_mut = PTHREAD_MUTEX_INITIALIZER;
+    dns_recv_pipe.pipe_mutex = &dns_recv_mut;
+
+    pthread_mutex_t tcp_send_mut = PTHREAD_MUTEX_INITIALIZER;
+    tcp_send_pipe.pipe_mutex = &tcp_send_mut;
+    pthread_mutex_t tcp_recv_mut = PTHREAD_MUTEX_INITIALIZER;
+    tcp_recv_pipe.pipe_mutex = &tcp_recv_mut;
+
+    pthread_mutex_t udp_send_mut = PTHREAD_MUTEX_INITIALIZER;
+    udp_send_pipe.pipe_mutex = &udp_send_mut;
+    pthread_mutex_t udp_recv_mut = PTHREAD_MUTEX_INITIALIZER;
+    udp_recv_pipe.pipe_mutex = &udp_recv_mut;
+
+    pthread_mutex_t ip_send_mut = PTHREAD_MUTEX_INITIALIZER;
+    ip_send_pipe.pipe_mutex = &ip_send_mut;
+    pthread_mutex_t ip_recv_mut = PTHREAD_MUTEX_INITIALIZER;
+    ip_recv_pipe.pipe_mutex = &ip_recv_mut;
+
+    pthread_mutex_t eth_send_mut = PTHREAD_MUTEX_INITIALIZER;
+    eth_send_pipe.pipe_mutex = &eth_send_mut;
+    pthread_mutex_t eth_recv_mut = PTHREAD_MUTEX_INITIALIZER;
+    eth_recv_pipe.pipe_mutex = &eth_recv_mut;
 
     // Create thread pool
     m_thread_pool = new ThreadPool(16);
 
     // Create thread ids
     pthread_t tid_1, tid_2, tid_3, tid_4, tid_5, tid_6, tid_7, tid_8, tid_9;
-    pthread_t tid_10, tid_11, tid_12, tid_13, tid_14, tid_15, tid_16;
+    pthread_t tid_10, tid_11, tid_12, tid_13, tid_14, tid_15, tid_16, tid_17;
 
     // Create vars for threads
     int err;
@@ -155,18 +205,31 @@ PPP::PPP()
         exit(1);
     }
 
+    // start a thread for receiving messages
+    err = pthread_create(&tid_17, NULL, PPP::msg_recv, (void*) this);
+    if (err != 0) {
+        cout << "msg_recv() failed: " << err << endl;
+        exit(1);
+    }
+
 }
 
 PPP::~PPP()
 {
+    //pthread_mutex_destroy(&out_mutex);
     delete m_thread_pool;
 }
 
-void PPP::msg_recv(int sock_num)
+/*
+ * Function to put in receive client mode
+ * 
+ * Parameter is socket number of the server
+ */
+void* PPP::msg_recv(void* arg)
 {
-
-    char udp_portnum[6] = "32001";
-    int udp_sock = updSocket(udp_portnum);
+    PPP* ppp = (PPP*) arg;
+    char udp_portnum[6] = "32000";
+    ppp->recv_sock = updSocket(udp_portnum);
     char mesg_buf[1024];
     struct sockaddr_in cliaddr;
     socklen_t len;
@@ -175,27 +238,79 @@ void PPP::msg_recv(int sock_num)
     while (1) {
         memset(&mesg_buf, 0, sizeof(mesg_buf));
         len = sizeof(cliaddr);
-        n = recvfrom(udp_sock, mesg_buf, 1024, 0, (struct sockaddr *)&cliaddr, &len);
+        n = recvfrom(ppp->recv_sock, mesg_buf, 1024, 0, (struct sockaddr *)&cliaddr, &len);
         Message* msg = new Message(mesg_buf, n);
-        write(net_to_eth[1], msg, sizeof(msg));
+        
+        // Acquire mutex lock on pipe
+        pthread_mutex_lock(ppp->eth_recv_pipe.pipe_mutex);
+
+        // Write to pipe
+        write(ppp->eth_recv_pipe.pipe_d[1], msg, sizeof(msg));
+
+        // Remove mutex lock on pipe
+        pthread_mutex_unlock(ppp->eth_recv_pipe.pipe_mutex);
     }
 }
 
 void PPP::msg_send(Message* msg, int protocol_id){
     if (protocol_id == 5) {
-        write(app_to_ftp[1], msg, sizeof(msg));
+        pipe_unit ftp;
+        ftp.protocol_id = 5;
+        ftp.msg = msg;
+
+        // Acquire mutex lock on pipe
+        pthread_mutex_lock(ftp_send_pipe.pipe_mutex);
+
+        // Write to ftp send pipe
+        write(ftp_send_pipe.pipe_d[1], (char*) &ftp, sizeof(pipe_unit));
+
+        // Remove mutex lock on pipe
+        pthread_mutex_unlock(ftp_send_pipe.pipe_mutex);
     }
 
     else if (protocol_id == 6){
-        write(app_to_tel[1], msg, sizeof(msg));
+        pipe_unit tel;
+        tel.protocol_id = 6;
+        tel.msg = msg;
+        
+        // Acquire mutex lock on pipe
+        pthread_mutex_lock(tel_send_pipe.pipe_mutex);
+
+        // Write to ftp send pipe
+        write(tel_send_pipe.pipe_d[1], (char*) &tel, sizeof(pipe_unit));
+
+        // Remove mutex lock on pipe
+        pthread_mutex_unlock(tel_send_pipe.pipe_mutex);
     }
 
     else if (protocol_id == 7){
-        write(app_to_rdp[1], msg, sizeof(msg));
+        pipe_unit rdp;
+        rdp.protocol_id = 7;
+        rdp.msg = msg;
+        
+        // Acquire mutex lock on pipe
+        pthread_mutex_lock(rdp_send_pipe.pipe_mutex);
+
+        // Write to ftp send pipe
+        write(rdp_send_pipe.pipe_d[1], (char*) &rdp, sizeof(pipe_unit));
+
+        // Remove mutex lock on pipe
+        pthread_mutex_unlock(rdp_send_pipe.pipe_mutex);
     }
 
     else if (protocol_id == 8){
-        write(app_to_dns[1], msg, sizeof(msg));
+        pipe_unit dns;
+        dns.protocol_id = 8;
+        dns.msg = msg;
+
+        // Acquire mutex lock on pipe
+        pthread_mutex_lock(dns_send_pipe.pipe_mutex);
+
+        // Write to ftp send pipe
+        write(dns_send_pipe.pipe_d[1], (char*) &dns, sizeof(pipe_unit));
+
+        // Remove mutex lock on pipe
+        pthread_mutex_unlock(dns_send_pipe.pipe_mutex);
     }
 
     else{
@@ -205,14 +320,73 @@ void PPP::msg_send(Message* msg, int protocol_id){
 
 void* PPP::eth_send(void* arg){
     PPP* ppp = (PPP*) arg;
-    Message* msg;
+    char msg_buf[1024];
+    struct sockaddr_in serv_sin;
+    socklen_t len;
+    
     while(1){
-        read(ppp->ip_to_eth[0], msg, sizeof(msg));
+        Message* msg;
+        pipe_unit* read_pipe;
+        memset(&msg_buf, 0, sizeof(msg_buf));
+        len = sizeof(serv_sin);
+
+        // Wait until read succeeds
+        read(ppp->eth_send_pipe.pipe_d[0], (pipe_unit*) read_pipe, sizeof(pipe_unit));
+
+        // Store message in variable
+        msg = read_pipe->msg;
+
+        // Create new header
+        eth_header* h = new eth_header;
+        h->hlp = read_pipe->protocol_id;
+        h->m_size = msg->msgLen();
+        
+        // Add header to message
+        msg->msgAddHdr((char*) h, sizeof(eth_header));
+
+        // Flaten message to buffer
+        msg->msgFlat(msg_buf);
+
+        // Send out over network
+        sendto(ppp->send_sock, msg_buf, msg->msgLen(), 0, (struct sockaddr *)&serv_sin, len);
     }
+
+
 }
 
 void* PPP::eth_recv(void* arg){
-    ;
+    PPP* ppp = (PPP*) arg;
+    
+    while(1){
+        Message* msg;
+        pipe_unit* read_pipe;
+
+        read(ppp->eth_recv_pipe.pipe_d[0], (pipe_unit*) read_pipe, sizeof(pipe_unit));
+
+        // Strip headers
+        msg = read_pipe->msg;
+        int protocol_id = atoi(msg->msgStripHdr(2));
+        msg->msgStripHdr(10);
+
+        // Create new pipe unit
+        pipe_unit send_pipe;
+        send_pipe.protocol_id = 1;
+        send_pipe.msg = msg;
+
+        if (protocol_id == 2){
+            // Lock mutex
+            pthread_mutex_lock(ppp->ip_recv_pipe.pipe_mutex);
+
+            // Write to pipe
+            write(ppp->ip_recv_pipe.pipe_d[1], (char*) &send_pipe, sizeof(pipe_unit));
+
+            // Unlock mutex
+            pthread_mutex_unlock(ppp->ip_recv_pipe.pipe_mutex);
+        }
+        else{
+            cout << "Error invalid protocol going up from eth" << endl;
+        }
+    }
 }
 
 void* PPP::IP_send(void* arg){
@@ -220,7 +394,48 @@ void* PPP::IP_send(void* arg){
 }
 
 void* PPP::IP_recv(void* arg){
-    ;
+    PPP* ppp = (PPP*) arg;
+    
+    while(1){
+        Message* msg;
+        pipe_unit* read_pipe;
+
+        read(ppp->ip_recv_pipe.pipe_d[0], (pipe_unit*) read_pipe, sizeof(pipe_unit));
+
+        // Strip headers
+        msg = read_pipe->msg;
+        int protocol_id = atoi(msg->msgStripHdr(2));
+        msg->msgStripHdr(14);
+
+        // Create new pipe unit
+        pipe_unit send_pipe;
+        send_pipe.protocol_id = 2;
+        send_pipe.msg = msg;
+
+        if (protocol_id == 3){
+            // Lock mutex
+            pthread_mutex_lock(ppp->tcp_recv_pipe.pipe_mutex);
+
+            // Write to pipe
+            write(ppp->tcp_recv_pipe.pipe_d[1], (char*) &send_pipe, sizeof(pipe_unit));
+
+            // Unlock mutex
+            pthread_mutex_unlock(ppp->tcp_recv_pipe.pipe_mutex);
+        }
+        else if (protocol_id == 4){
+            // Lock mutex
+            pthread_mutex_lock(ppp->udp_recv_pipe.pipe_mutex);
+
+            // Write to pipe
+            write(ppp->udp_recv_pipe.pipe_d[1], (char*) &send_pipe, sizeof(pipe_unit));
+
+            // Unlock mutex
+            pthread_mutex_unlock(ppp->udp_recv_pipe.pipe_mutex);
+        }
+        else{
+            cout << "Error invalid protocol going up from ip" << endl;
+        }
+    }
 }
 
 void* PPP::TCP_send(void* arg){
@@ -228,7 +443,48 @@ void* PPP::TCP_send(void* arg){
 }
 
 void* PPP::TCP_recv(void* arg){
-    ;
+    PPP* ppp = (PPP*) arg;
+    
+    while(1){
+        Message* msg;
+        pipe_unit* read_pipe;
+
+        read(ppp->tcp_recv_pipe.pipe_d[0], (pipe_unit*) read_pipe, sizeof(pipe_unit));
+
+        // Strip headers
+        msg = read_pipe->msg;
+        int protocol_id = atoi(msg->msgStripHdr(2));
+        msg->msgStripHdr(6);
+
+        // Create new pipe unit
+        pipe_unit send_pipe;
+        send_pipe.protocol_id = 3;
+        send_pipe.msg = msg;
+
+        if (protocol_id == 5){
+            // Lock mutex
+            pthread_mutex_lock(ppp->ftp_recv_pipe.pipe_mutex);
+
+            // Write to pipe
+            write(ppp->ftp_recv_pipe.pipe_d[1], (char*) &send_pipe, sizeof(pipe_unit));
+
+            // Unlock mutex
+            pthread_mutex_unlock(ppp->ftp_recv_pipe.pipe_mutex);
+        }
+        else if (protocol_id == 6){
+            // Lock mutex
+            pthread_mutex_lock(ppp->tel_recv_pipe.pipe_mutex);
+
+            // Write to pipe
+            write(ppp->tel_recv_pipe.pipe_d[1], (char*) &send_pipe, sizeof(pipe_unit));
+
+            // Unlock mutex
+            pthread_mutex_unlock(ppp->tel_recv_pipe.pipe_mutex);
+        }
+        else{
+            cout << "Error invalid protocol going up from tcp" << endl;
+        }
+    }
 }
 
 void* PPP::UDP_send(void* arg){
@@ -236,7 +492,48 @@ void* PPP::UDP_send(void* arg){
 }
 
 void* PPP::UDP_recv(void* arg){
-    ;
+    PPP* ppp = (PPP*) arg;
+    
+    while(1){
+        Message* msg;
+        pipe_unit* read_pipe;
+
+        read(ppp->udp_recv_pipe.pipe_d[0], (pipe_unit*) read_pipe, sizeof(pipe_unit));
+
+        // Strip headers
+        msg = read_pipe->msg;
+        int protocol_id = atoi(msg->msgStripHdr(2));
+        msg->msgStripHdr(6);
+
+        // Create new pipe unit
+        pipe_unit send_pipe;
+        send_pipe.protocol_id = 4;
+        send_pipe.msg = msg;
+
+        if (protocol_id == 7){
+            // Lock mutex
+            pthread_mutex_lock(ppp->rdp_recv_pipe.pipe_mutex);
+
+            // Write to pipe
+            write(ppp->rdp_recv_pipe.pipe_d[1], (char*) &send_pipe, sizeof(pipe_unit));
+
+            // Unlock mutex
+            pthread_mutex_unlock(ppp->rdp_recv_pipe.pipe_mutex);
+        }
+        else if (protocol_id == 8){
+            // Lock mutex
+            pthread_mutex_lock(ppp->dns_recv_pipe.pipe_mutex);
+
+            // Write to pipe
+            write(ppp->dns_recv_pipe.pipe_d[1], (char*) &send_pipe, sizeof(pipe_unit));
+
+            // Unlock mutex
+            pthread_mutex_unlock(ppp->dns_recv_pipe.pipe_mutex);
+        }
+        else{
+            cout << "Error invalid protocol going up from udp" << endl;
+        }
+    }
 }
 
 void* PPP::FTP_send(void* arg){
@@ -244,7 +541,29 @@ void* PPP::FTP_send(void* arg){
 }
 
 void* PPP::FTP_recv(void* arg){
-    ;
+    PPP* ppp = (PPP*) arg;
+    
+    while(1){
+        Message* msg;
+        pipe_unit* read_pipe;
+
+        read(ppp->ftp_recv_pipe.pipe_d[0], (pipe_unit*) read_pipe, sizeof(pipe_unit));
+
+        // Strip headers
+        msg = read_pipe->msg;
+        msg->msgStripHdr(12);
+
+        // Copy message to buffer and terminate line
+        char* msg_buf = new char[1024];
+        msg->msgFlat(msg_buf);
+        msg_buf[msg->msgLen()] = '\n';
+
+        // Print to user
+        cout << "FTP Message Recevied: " << msg_buf;
+
+        // Clean up
+        delete msg_buf;
+    }
 }
 
 void* PPP::tel_send(void* arg){
@@ -252,7 +571,29 @@ void* PPP::tel_send(void* arg){
 }
 
 void* PPP::tel_recv(void* arg){
-    ;
+    PPP* ppp = (PPP*) arg;
+    
+    while(1){
+        Message* msg;
+        pipe_unit* read_pipe;
+
+        read(ppp->tel_recv_pipe.pipe_d[0], (pipe_unit*) read_pipe, sizeof(pipe_unit));
+
+        // Strip headers
+        msg = read_pipe->msg;
+        msg->msgStripHdr(12);
+
+        // Copy message to buffer and terminate line
+        char* msg_buf = new char[1024];
+        msg->msgFlat(msg_buf);
+        msg_buf[msg->msgLen()] = '\n';
+
+        // Print to user
+        cout << "Telnet Message Recevied: " << msg_buf;
+
+        // Clean up
+        delete msg_buf;
+    }
 }
 
 void* PPP::RDP_send(void* arg){
@@ -260,7 +601,29 @@ void* PPP::RDP_send(void* arg){
 }
 
 void* PPP::RDP_recv(void* arg){
-    ;
+    PPP* ppp = (PPP*) arg;
+    
+    while(1){
+        Message* msg;
+        pipe_unit* read_pipe;
+
+        read(ppp->rdp_recv_pipe.pipe_d[0], (pipe_unit*) read_pipe, sizeof(pipe_unit));
+
+        // Strip headers
+        msg = read_pipe->msg;
+        msg->msgStripHdr(16);
+
+        // Copy message to buffer and terminate line
+        char* msg_buf = new char[1024];
+        msg->msgFlat(msg_buf);
+        msg_buf[msg->msgLen()] = '\n';
+
+        // Print to user
+        cout << "RDP Message Recevied: " << msg_buf;
+
+        // Clean up
+        delete msg_buf;
+    }
 }
 
 void* PPP::DNS_send(void* arg){
@@ -268,5 +631,27 @@ void* PPP::DNS_send(void* arg){
 }
 
 void* PPP::DNS_recv(void* arg){
-    ;
+    PPP* ppp = (PPP*) arg;
+    
+    while(1){
+        Message* msg;
+        pipe_unit* read_pipe;
+
+        read(ppp->dns_recv_pipe.pipe_d[0], (pipe_unit*) read_pipe, sizeof(pipe_unit));
+
+        // Strip headers
+        msg = read_pipe->msg;
+        msg->msgStripHdr(12);
+
+        // Copy message to buffer and terminate line
+        char* msg_buf = new char[1024];
+        msg->msgFlat(msg_buf);
+        msg_buf[msg->msgLen()] = '\n';
+
+        // Print to user
+        cout << "DNS Message Recevied: " << msg_buf;
+
+        // Clean up
+        delete msg_buf;
+    }
 }

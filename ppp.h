@@ -1,7 +1,6 @@
 #ifndef _PPP_
 #define _PPP_
 
-#include <map>
 #include <semaphore.h>
 #include <string.h>
 #include <mutex>
@@ -18,11 +17,12 @@ public:
     ~PPP();
     
     void msg_send(Message* msg, int protocol_id);
-    void msg_recv(int sock_num);
+    
 
 private:
     ThreadPool* m_thread_pool;
 
+    // Functions for protocols
     static void* eth_send(void* arg);
     static void* eth_recv(void* arg);
     static void* IP_send(void* arg);
@@ -40,17 +40,122 @@ private:
     static void* DNS_send(void* arg);
     static void* DNS_recv(void* arg);
 
-    // Allocate arrays for pipes
-    int ftp_to_tcp[2], tcp_to_ftp[2], app_to_ftp[2];
-    int tel_to_tcp[2], tcp_to_tel[2], app_to_tel[2];
-    int rdp_to_udp[2], udp_to_rdp[2], app_to_rdp[2];
-    int dns_to_udp[2], udp_to_dns[2], app_to_dns[2];
-    int tcp_to_ip[2], ip_to_tcp[2], udp_to_ip[2];
-    int ip_to_udp[2], ip_to_eth[2], eth_to_ip[2];
-    int net_to_eth[2];
+    // Functions for receiving messages
+    static void* msg_recv(void* arg);
+
+    //Struct to store arguements for the resquester threads
+    typedef struct {
+        // Array for pipe descriptor
+        int pipe_d[2];
+     
+        //Pointer to mutex
+        pthread_mutex_t* pipe_mutex;
+    } pipes;
+
+    // Allocate structs for pipes
+    pipes ftp_send_pipe, ftp_recv_pipe, tel_send_pipe, tel_recv_pipe;
+    pipes rdp_send_pipe, rdp_recv_pipe, dns_send_pipe, dns_recv_pipe;
+    pipes tcp_send_pipe, tcp_recv_pipe, udp_send_pipe, udp_recv_pipe;
+    pipes ip_send_pipe, ip_recv_pipe, eth_send_pipe, eth_recv_pipe;
+
+    //Struct to store arguements for the resquester threads
+    typedef struct {
+        // Int for higher level protocol
+        int hlp;
+     
+        // Char array for other info
+        char oi[12];
+
+        // Int for size of message without header
+        int m_size;
+    } IP_header;
+
+    //Struct to store arguements for the resquester threads
+    typedef struct {
+        // Int for higher level protocol
+        int hlp;
+     
+        // Char array for other info
+        char oi[8];
+
+        // Int for size of message without header
+        int m_size;
+    } eth_header;
+
+    //Struct to store arguements for the resquester threads
+    typedef struct {
+        // Int for higher level protocol
+        int hlp;
+     
+        // Char array for other info
+        char oi[4];
+
+        // Int for size of message without header
+        int m_size;
+    } TCP_header;
+
+    //Struct to store arguements for the resquester threads
+    typedef struct {
+        // Int for higher level protocol
+        int hlp;
+     
+        // Char array for other info
+        char oi[4];
+
+        // Int for size of message without header
+        int m_size;
+    } UDP_header;
+
+    //Struct to store arguements for the resquester threads
+    typedef struct {
+        // Int for higher level protocol
+        int hlp;
+     
+        // Char array for other info
+        char oi[12];
+
+        // Int for size of message without header
+        int m_size;
+    } RDP_header;
+
+    //Struct to store arguements for the resquester threads
+    typedef struct {
+        // Int for higher level protocol
+        int hlp;
+     
+        // Char array for other info
+        char oi[8];
+
+        // Int for size of message without header
+        int m_size;
+    } DNS_header;
+
+    //Struct to store arguements for the resquester threads
+    typedef struct {
+        // Int for higher level protocol
+        int hlp;
+     
+        // Char array for other info
+        char oi[8];
+
+        // Int for size of message without header
+        int m_size;
+    } ftp_header;
+
+    //Struct to store arguements for the resquester threads
+    typedef struct {
+        // Int for higher level protocol
+        int hlp;
+     
+        // Char array for other info
+        char oi[8];
+
+        // Int for size of message without header
+        int m_size;
+    } tel_header;
 
     // Variable for storing the udp socket for the virtual network
-    int udp_sock;
+    int recv_sock, send_sock;
 };
 
 #endif
