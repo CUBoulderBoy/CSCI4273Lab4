@@ -24,5 +24,8 @@ message_shiv:
 ppm:
 	$(CC) -o ppm_test $(CFLG) ppm.cpp ThreadPool.cpp Message.cpp $(LIBS)
 
+ppp:
+	$(CC) -o ppp_test $(CFLG) ppp.cpp ThreadPool.cpp Message.cpp $(LIBS)
+
 clean:
 	rm -f event thread message *.o *.a

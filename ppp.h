@@ -1,3 +1,12 @@
+#ifndef _PPP_
+#define _PPP_
+
+#include <map>
+#include <semaphore.h>
+#include <string.h>
+#include <mutex>
+#include <iostream>
+#include "message.h"
 #include "threadpool.h"
 
 typedef void (*function_pointer)(void*);
@@ -9,7 +18,7 @@ public:
     ~PPP();
     
     void msg_send(Message* msg, int protocol_id);
-    void msg_recv(void* arg);
+    void msg_recv(int sock_num);
 
 private:
     ThreadPool* m_thread_pool;
@@ -38,9 +47,10 @@ private:
     int dns_to_udp[2], udp_to_dns[2], app_to_dns[2];
     int tcp_to_ip[2], ip_to_tcp[2], udp_to_ip[2];
     int ip_to_udp[2], ip_to_eth[2], eth_to_ip[2];
+    int net_to_eth[2];
 
-    // Variables for storing the udp sockets for the virtual network
-    int net_out, net_in;
+    // Variable for storing the udp socket for the virtual network
+    int udp_sock;
 };
 
 #endif

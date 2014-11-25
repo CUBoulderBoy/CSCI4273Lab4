@@ -4,9 +4,10 @@
 #include <cstdlib>
 #include <stdio.h>
 #include <string>
-#include <string.h>
 #include <sys/errno.h>
 #include <stdarg.h>
+
+using namespace std;
 
 int updSocket(char portnum[]);
 int errexit(const char *format, ...);
