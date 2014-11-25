@@ -390,7 +390,40 @@ void* PPP::eth_recv(void* arg){
 }
 
 void* PPP::IP_send(void* arg){
-    ;
+    PPP* ppp = (PPP*) arg;
+
+    while(1){
+        Message* msg;
+        pipe_unit* read_pipe;
+
+        // Wait for message to send
+        read(ppp->ip_send_pipe.pipe_d[0], (pipe_unit*) read_pipe, sizeof(pipe_unit));
+
+        // Store message in variable
+        msg = read_pipe->msg;
+
+        // Create new header
+        IP_header* h = new IP_header;
+        h->hlp = read_pipe->protocol_id;
+        h->m_size = msg->msgLen();
+        
+        // Add header to message
+        msg->msgAddHdr((char*) h, sizeof(IP_header));
+
+        // Build new pipe unit
+        pipe_unit send_pipe;
+        send_pipe.protocol_id = 2;
+        send_pipe.msg = msg;
+
+        // Acquire mutex lock on pipe
+        pthread_mutex_lock(ppp->eth_send_pipe.pipe_mutex);
+
+        // Write to eth send pipe
+        write(ppp->eth_send_pipe.pipe_d[1], (char*) &send_pipe, sizeof(pipe_unit));
+
+        // Remove mutex lock on pipe
+        pthread_mutex_unlock(ppp->eth_send_pipe.pipe_mutex);
+    }
 }
 
 void* PPP::IP_recv(void* arg){
@@ -439,7 +472,40 @@ void* PPP::IP_recv(void* arg){
 }
 
 void* PPP::TCP_send(void* arg){
-    ;
+    PPP* ppp = (PPP*) arg;
+
+    while(1){
+        Message* msg;
+        pipe_unit* read_pipe;
+
+        // Wait for message to send
+        read(ppp->tcp_send_pipe.pipe_d[0], (pipe_unit*) read_pipe, sizeof(pipe_unit));
+
+        // Store message in variable
+        msg = read_pipe->msg;
+
+        // Create new header
+        TCP_header* h = new TCP_header;
+        h->hlp = read_pipe->protocol_id;
+        h->m_size = msg->msgLen();
+        
+        // Add header to message
+        msg->msgAddHdr((char*) h, sizeof(TCP_header));
+
+        // Build new pipe unit
+        pipe_unit send_pipe;
+        send_pipe.protocol_id = 3;
+        send_pipe.msg = msg;
+
+        // Acquire mutex lock on pipe
+        pthread_mutex_lock(ppp->ip_send_pipe.pipe_mutex);
+
+        // Write to eth send pipe
+        write(ppp->ip_send_pipe.pipe_d[1], (char*) &send_pipe, sizeof(pipe_unit));
+
+        // Remove mutex lock on pipe
+        pthread_mutex_unlock(ppp->ip_send_pipe.pipe_mutex);
+    }
 }
 
 void* PPP::TCP_recv(void* arg){
@@ -488,7 +554,40 @@ void* PPP::TCP_recv(void* arg){
 }
 
 void* PPP::UDP_send(void* arg){
-    ;
+    PPP* ppp = (PPP*) arg;
+
+    while(1){
+        Message* msg;
+        pipe_unit* read_pipe;
+
+        // Wait for message to send
+        read(ppp->udp_send_pipe.pipe_d[0], (pipe_unit*) read_pipe, sizeof(pipe_unit));
+
+        // Store message in variable
+        msg = read_pipe->msg;
+
+        // Create new header
+        UDP_header* h = new UDP_header;
+        h->hlp = read_pipe->protocol_id;
+        h->m_size = msg->msgLen();
+        
+        // Add header to message
+        msg->msgAddHdr((char*) h, sizeof(UDP_header));
+
+        // Build new pipe unit
+        pipe_unit send_pipe;
+        send_pipe.protocol_id = 4;
+        send_pipe.msg = msg;
+
+        // Acquire mutex lock on pipe
+        pthread_mutex_lock(ppp->ip_send_pipe.pipe_mutex);
+
+        // Write to eth send pipe
+        write(ppp->ip_send_pipe.pipe_d[1], (char*) &send_pipe, sizeof(pipe_unit));
+
+        // Remove mutex lock on pipe
+        pthread_mutex_unlock(ppp->ip_send_pipe.pipe_mutex);
+    }
 }
 
 void* PPP::UDP_recv(void* arg){
@@ -537,7 +636,39 @@ void* PPP::UDP_recv(void* arg){
 }
 
 void* PPP::FTP_send(void* arg){
-    ;
+    PPP* ppp = (PPP*) arg;
+
+    while(1){
+        Message* msg;
+        pipe_unit* read_pipe;
+
+        // Wait for message to send
+        read(ppp->ftp_send_pipe.pipe_d[0], (pipe_unit*) read_pipe, sizeof(pipe_unit));
+
+        // Store message in variable
+        msg = read_pipe->msg;
+
+        // Create new header
+        ftp_header* h = new ftp_header;
+        h->m_size = msg->msgLen();
+        
+        // Add header to message
+        msg->msgAddHdr((char*) h, sizeof(ftp_header));
+
+        // Build new pipe unit
+        pipe_unit send_pipe;
+        send_pipe.protocol_id = 5;
+        send_pipe.msg = msg;
+
+        // Acquire mutex lock on pipe
+        pthread_mutex_lock(ppp->tcp_send_pipe.pipe_mutex);
+
+        // Write to eth send pipe
+        write(ppp->tcp_send_pipe.pipe_d[1], (char*) &send_pipe, sizeof(pipe_unit));
+
+        // Remove mutex lock on pipe
+        pthread_mutex_unlock(ppp->tcp_send_pipe.pipe_mutex);
+    }
 }
 
 void* PPP::FTP_recv(void* arg){
@@ -567,7 +698,39 @@ void* PPP::FTP_recv(void* arg){
 }
 
 void* PPP::tel_send(void* arg){
-    ;
+        PPP* ppp = (PPP*) arg;
+
+    while(1){
+        Message* msg;
+        pipe_unit* read_pipe;
+
+        // Wait for message to send
+        read(ppp->tel_send_pipe.pipe_d[0], (pipe_unit*) read_pipe, sizeof(pipe_unit));
+
+        // Store message in variable
+        msg = read_pipe->msg;
+
+        // Create new header
+        tel_header* h = new tel_header;
+        h->m_size = msg->msgLen();
+        
+        // Add header to message
+        msg->msgAddHdr((char*) h, sizeof(tel_header));
+
+        // Build new pipe unit
+        pipe_unit send_pipe;
+        send_pipe.protocol_id = 6;
+        send_pipe.msg = msg;
+
+        // Acquire mutex lock on pipe
+        pthread_mutex_lock(ppp->tcp_send_pipe.pipe_mutex);
+
+        // Write to eth send pipe
+        write(ppp->tcp_send_pipe.pipe_d[1], (char*) &send_pipe, sizeof(pipe_unit));
+
+        // Remove mutex lock on pipe
+        pthread_mutex_unlock(ppp->tcp_send_pipe.pipe_mutex);
+    }
 }
 
 void* PPP::tel_recv(void* arg){
@@ -597,7 +760,39 @@ void* PPP::tel_recv(void* arg){
 }
 
 void* PPP::RDP_send(void* arg){
-    ;
+        PPP* ppp = (PPP*) arg;
+
+    while(1){
+        Message* msg;
+        pipe_unit* read_pipe;
+
+        // Wait for message to send
+        read(ppp->rdp_send_pipe.pipe_d[0], (pipe_unit*) read_pipe, sizeof(pipe_unit));
+
+        // Store message in variable
+        msg = read_pipe->msg;
+
+        // Create new header
+        RDP_header* h = new RDP_header;
+        h->m_size = msg->msgLen();
+        
+        // Add header to message
+        msg->msgAddHdr((char*) h, sizeof(RDP_header));
+
+        // Build new pipe unit
+        pipe_unit send_pipe;
+        send_pipe.protocol_id = 7;
+        send_pipe.msg = msg;
+
+        // Acquire mutex lock on pipe
+        pthread_mutex_lock(ppp->udp_send_pipe.pipe_mutex);
+
+        // Write to eth send pipe
+        write(ppp->udp_send_pipe.pipe_d[1], (char*) &send_pipe, sizeof(pipe_unit));
+
+        // Remove mutex lock on pipe
+        pthread_mutex_unlock(ppp->udp_send_pipe.pipe_mutex);
+    }
 }
 
 void* PPP::RDP_recv(void* arg){
@@ -627,7 +822,39 @@ void* PPP::RDP_recv(void* arg){
 }
 
 void* PPP::DNS_send(void* arg){
-    ;
+        PPP* ppp = (PPP*) arg;
+
+    while(1){
+        Message* msg;
+        pipe_unit* read_pipe;
+
+        // Wait for message to send
+        read(ppp->dns_send_pipe.pipe_d[0], (pipe_unit*) read_pipe, sizeof(pipe_unit));
+
+        // Store message in variable
+        msg = read_pipe->msg;
+
+        // Create new header
+        DNS_header* h = new DNS_header;
+        h->m_size = msg->msgLen();
+        
+        // Add header to message
+        msg->msgAddHdr((char*) h, sizeof(DNS_header));
+
+        // Build new pipe unit
+        pipe_unit send_pipe;
+        send_pipe.protocol_id = 8;
+        send_pipe.msg = msg;
+
+        // Acquire mutex lock on pipe
+        pthread_mutex_lock(ppp->udp_send_pipe.pipe_mutex);
+
+        // Write to eth send pipe
+        write(ppp->udp_send_pipe.pipe_d[1], (char*) &send_pipe, sizeof(pipe_unit));
+
+        // Remove mutex lock on pipe
+        pthread_mutex_unlock(ppp->udp_send_pipe.pipe_mutex);
+    }
 }
 
 void* PPP::DNS_recv(void* arg){
