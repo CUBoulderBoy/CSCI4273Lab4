@@ -1,4 +1,4 @@
-# Lab 3: Libraries
+# Lab 4: Networking with PPP and PPM
 # Christopher Jordan and Aaron Davis
 # CSCI 4273/5273 Fall 2014
 
@@ -7,25 +7,19 @@ LIBS=-lpthread
 CC=g++
 
 # Main target
-all: threadpool eventscheduler message message_shiv
+all: ppm_test ppp_test
 
-threadpool:
-	$(CC) -o thread $(CFLG) driver1.cc ThreadPool.cpp $(LIBS)
+# Compile rules
+.c.o:
+	gcc -c $(CFLG) $<
+.cpp.o:
+	g++ -c $(CFLG) $<
 
-eventscheduler:
-	$(CC) -o event $(CFLG) driver2.cc EventScheduler.cpp ThreadPool.cpp $(LIBS)
+ppm_test:ppm_test.0
+	$(CC) -o $@ $(CFLG) ppm.cpp ThreadPool.cpp Message.cpp $^ $(LIBS)
 
-message:
-	$(CC) -o message $(CFLG) driver3.cc Message.cpp $(LIBS)
-
-message_shiv:
-	$(CC) -o message_shiv $(CFLG) driver3_shiv.cc $(LIBS)
-
-ppm:
-	$(CC) -o ppm_test $(CFLG) ppm.cpp ThreadPool.cpp Message.cpp $(LIBS)
-
-ppp:
-	$(CC) -o ppp_test $(CFLG) ppp.cpp ThreadPool.cpp Message.cpp $(LIBS)
+ppp_test:ppp_test.o
+	$(CC) -o $@ $(CFLG) ppp.cpp ThreadPool.cpp Message.cpp $^ $(LIBS)
 
 clean:
-	rm -f event thread message *.o *.a
+	rm -f ppp_test ppm_test *.o *.a

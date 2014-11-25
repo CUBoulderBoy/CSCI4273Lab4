@@ -1,12 +1,10 @@
 #include "ppp.h"
 #include "updsocket.cpp"
 
-#include <sys/socket.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
 #include <string.h>
+#include <iostream>
 
 using namespace std;
 
@@ -15,8 +13,13 @@ struct pipe_unit {
     Message *msg;
 };
 
-PPP::PPP()
-{
+PPP::PPP(char in[], int out){
+    // Start communications on sockets first
+    start_com(in, out);
+
+    // For testing
+    cout << "Building pipes" << endl;
+
     // Create pipes for threads
     pipe(ftp_send_pipe.pipe_d);
     pipe(ftp_recv_pipe.pipe_d);
@@ -41,6 +44,9 @@ PPP::PPP()
 
     pipe(ip_send_pipe.pipe_d);
     pipe(ip_recv_pipe.pipe_d);
+
+    // For testing
+    cout << "Initializing mutex locks" << endl;
 
     // Initialize mutex locks on pipes
     pthread_mutex_t ftp_send_mut = PTHREAD_MUTEX_INITIALIZER;
@@ -83,6 +89,9 @@ PPP::PPP()
     pthread_mutex_t eth_recv_mut = PTHREAD_MUTEX_INITIALIZER;
     eth_recv_pipe.pipe_mutex = &eth_recv_mut;
 
+    // For testing
+    cout << "Creating thread pool" << endl;
+
     // Create thread pool
     m_thread_pool = new ThreadPool(16);
 
@@ -92,6 +101,9 @@ PPP::PPP()
 
     // Create vars for threads
     int err;
+
+    // For testing
+    cout << "Spooling up threads" << endl;
 
     // start a thread for ethernet up
     err = pthread_create(&tid_1, NULL, PPP::eth_recv, (void*) this);
@@ -212,12 +224,28 @@ PPP::PPP()
         exit(1);
     }
 
+    // For testing
+    cout << "Threads all spooled up" << endl;
 }
 
 PPP::~PPP()
 {
-    //pthread_mutex_destroy(&out_mutex);
     delete m_thread_pool;
+}
+
+/*
+ * Function to start UDP connections
+ *
+ * Char in[] takes char array of desired port for inbound communications
+ *
+ * Int out takes an integer respresentation of the socket on the other client
+ */
+void PPP::start_com(char in[], int out){
+    recv_sock = updSocket(in);
+    send_sock = out;
+
+    // For testing
+    cout << "Port Number Recevied: " << in << endl;
 }
 
 /*
@@ -228,18 +256,24 @@ PPP::~PPP()
 void* PPP::msg_recv(void* arg)
 {
     PPP* ppp = (PPP*) arg;
-    char udp_portnum[6] = "32000";
-    ppp->recv_sock = updSocket(udp_portnum);
-    char mesg_buf[1024];
+    char msg_buf[1024];
     struct sockaddr_in cliaddr;
     socklen_t len;
     int n;
 
+    // For testing
+    cout << "Message receive thread running" << endl;
+
     while (1) {
-        memset(&mesg_buf, 0, sizeof(mesg_buf));
+        memset(&msg_buf, 0, sizeof(msg_buf));
         len = sizeof(cliaddr);
-        n = recvfrom(ppp->recv_sock, mesg_buf, 1024, 0, (struct sockaddr *)&cliaddr, &len);
-        Message* msg = new Message(mesg_buf, n);
+
+        // For testing
+        cout << "Waiting for message" << endl;
+
+        // Read message from socket
+        n = recvfrom(ppp->recv_sock, msg_buf, 1024, 0, (struct sockaddr *)&cliaddr, &len);
+        Message* msg = new Message(msg_buf, n);
         
         // Acquire mutex lock on pipe
         pthread_mutex_lock(ppp->eth_recv_pipe.pipe_mutex);

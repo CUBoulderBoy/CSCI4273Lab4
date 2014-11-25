@@ -9,15 +9,6 @@
 
 using namespace std;
 
-int updSocket(char portnum[]);
-int errexit(const char *format, ...);
-
-int main(int argc, char**argv)
-{
-    char udp_portnum[6] = "32000";
-    int upd_sock = updSocket(udp_portnum);
-}
-
 // print an error message and exit
 int errexit(const char *format, ...)
 {

@@ -1,10 +1,7 @@
 #ifndef _PPP_
 #define _PPP_
 
-#include <semaphore.h>
-#include <string.h>
 #include <mutex>
-#include <iostream>
 #include "message.h"
 #include "threadpool.h"
 
@@ -13,11 +10,11 @@ typedef void (*function_pointer)(void*);
 class PPP
 {
 public:
-    PPP();
+    PPP(char in[], int out);
     ~PPP();
     
     void msg_send(Message* msg, int protocol_id);
-    
+    void start_com(char in[], int out);
 
 private:
     ThreadPool* m_thread_pool;
