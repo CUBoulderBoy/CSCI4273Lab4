@@ -2,7 +2,7 @@
 # Christopher Jordan and Aaron Davis
 # CSCI 4273/5273 Fall 2014
 
-CFLG=-O3 -Wall -w -std=c++11
+CFLG=-Wall -w -g -std=c++11
 LIBS=-lpthread
 CC=g++
 

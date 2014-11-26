@@ -2,8 +2,15 @@
 #define _PPP_
 
 #include <mutex>
+#include <pthread.h>
 #include "message.h"
 #include "threadpool.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+using namespace std;
 
 typedef void (*function_pointer)(void*);
 

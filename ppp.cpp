@@ -1,10 +1,13 @@
 #include "ppp.h"
 #include "updsocket.cpp"
 
-#include <pthread.h>
 #include <unistd.h>
 #include <string.h>
 #include <iostream>
+#include <stdio.h>
+#include <string.h>
+#include <pthread.h>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -204,7 +207,7 @@ PPP::PPP(char in[], int out){
     }
 
     // start a thread for dns up
-    err = pthread_create(&tid_15, NULL, PPP::DNS_recv, NULL);
+    err = pthread_create(&tid_15, NULL, PPP::DNS_recv, (void*) this);
     if (err != 0) {
         cout << "dns_recv() failed: " << err << endl;
         exit(1);
@@ -360,7 +363,7 @@ void* PPP::eth_send(void* arg){
     
     while(1){
         Message* msg;
-        pipe_unit* read_pipe;
+        pipe_unit* read_pipe = new pipe_unit;
         memset(&msg_buf, 0, sizeof(msg_buf));
         len = sizeof(serv_sin);
 
@@ -393,7 +396,7 @@ void* PPP::eth_recv(void* arg){
     
     while(1){
         Message* msg;
-        pipe_unit* read_pipe;
+        pipe_unit* read_pipe = new pipe_unit;
 
         read(ppp->eth_recv_pipe.pipe_d[0], (pipe_unit*) read_pipe, sizeof(pipe_unit));
 
@@ -428,7 +431,7 @@ void* PPP::IP_send(void* arg){
 
     while(1){
         Message* msg;
-        pipe_unit* read_pipe;
+        pipe_unit* read_pipe = new pipe_unit;
 
         // Wait for message to send
         read(ppp->ip_send_pipe.pipe_d[0], (pipe_unit*) read_pipe, sizeof(pipe_unit));
@@ -465,7 +468,7 @@ void* PPP::IP_recv(void* arg){
     
     while(1){
         Message* msg;
-        pipe_unit* read_pipe;
+        pipe_unit* read_pipe = new pipe_unit;
 
         read(ppp->ip_recv_pipe.pipe_d[0], (pipe_unit*) read_pipe, sizeof(pipe_unit));
 
@@ -510,7 +513,7 @@ void* PPP::TCP_send(void* arg){
 
     while(1){
         Message* msg;
-        pipe_unit* read_pipe;
+        pipe_unit* read_pipe = new pipe_unit;
 
         // Wait for message to send
         read(ppp->tcp_send_pipe.pipe_d[0], (pipe_unit*) read_pipe, sizeof(pipe_unit));
@@ -547,7 +550,7 @@ void* PPP::TCP_recv(void* arg){
     
     while(1){
         Message* msg;
-        pipe_unit* read_pipe;
+        pipe_unit* read_pipe = new pipe_unit;
 
         read(ppp->tcp_recv_pipe.pipe_d[0], (pipe_unit*) read_pipe, sizeof(pipe_unit));
 
@@ -590,9 +593,12 @@ void* PPP::TCP_recv(void* arg){
 void* PPP::UDP_send(void* arg){
     PPP* ppp = (PPP*) arg;
 
+    // For testing
+    cout << "Waiting for UDP message to send" << endl;
+
     while(1){
         Message* msg;
-        pipe_unit* read_pipe;
+        pipe_unit* read_pipe = new pipe_unit;
 
         // Wait for message to send
         read(ppp->udp_send_pipe.pipe_d[0], (pipe_unit*) read_pipe, sizeof(pipe_unit));
@@ -619,6 +625,9 @@ void* PPP::UDP_send(void* arg){
         // Write to eth send pipe
         write(ppp->ip_send_pipe.pipe_d[1], (char*) &send_pipe, sizeof(pipe_unit));
 
+        // For testing
+        cout << "UDP message written to IP" << endl;
+
         // Remove mutex lock on pipe
         pthread_mutex_unlock(ppp->ip_send_pipe.pipe_mutex);
     }
@@ -629,7 +638,7 @@ void* PPP::UDP_recv(void* arg){
     
     while(1){
         Message* msg;
-        pipe_unit* read_pipe;
+        pipe_unit* read_pipe = new pipe_unit;
 
         read(ppp->udp_recv_pipe.pipe_d[0], (pipe_unit*) read_pipe, sizeof(pipe_unit));
 
@@ -674,7 +683,7 @@ void* PPP::FTP_send(void* arg){
 
     while(1){
         Message* msg;
-        pipe_unit* read_pipe;
+        pipe_unit* read_pipe = new pipe_unit;
 
         // Wait for message to send
         read(ppp->ftp_send_pipe.pipe_d[0], (pipe_unit*) read_pipe, sizeof(pipe_unit));
@@ -710,7 +719,7 @@ void* PPP::FTP_recv(void* arg){
     
     while(1){
         Message* msg;
-        pipe_unit* read_pipe;
+        pipe_unit* read_pipe = new pipe_unit;
 
         read(ppp->ftp_recv_pipe.pipe_d[0], (pipe_unit*) read_pipe, sizeof(pipe_unit));
 
@@ -736,7 +745,7 @@ void* PPP::tel_send(void* arg){
 
     while(1){
         Message* msg;
-        pipe_unit* read_pipe;
+        pipe_unit* read_pipe = new pipe_unit;
 
         // Wait for message to send
         read(ppp->tel_send_pipe.pipe_d[0], (pipe_unit*) read_pipe, sizeof(pipe_unit));
@@ -772,7 +781,7 @@ void* PPP::tel_recv(void* arg){
     
     while(1){
         Message* msg;
-        pipe_unit* read_pipe;
+        pipe_unit* read_pipe = new pipe_unit;
 
         read(ppp->tel_recv_pipe.pipe_d[0], (pipe_unit*) read_pipe, sizeof(pipe_unit));
 
@@ -798,7 +807,7 @@ void* PPP::RDP_send(void* arg){
 
     while(1){
         Message* msg;
-        pipe_unit* read_pipe;
+        pipe_unit* read_pipe = new pipe_unit;
 
         // Wait for message to send
         read(ppp->rdp_send_pipe.pipe_d[0], (pipe_unit*) read_pipe, sizeof(pipe_unit));
@@ -834,7 +843,7 @@ void* PPP::RDP_recv(void* arg){
     
     while(1){
         Message* msg;
-        pipe_unit* read_pipe;
+        pipe_unit* read_pipe = new pipe_unit;
 
         read(ppp->rdp_recv_pipe.pipe_d[0], (pipe_unit*) read_pipe, sizeof(pipe_unit));
 
@@ -860,34 +869,62 @@ void* PPP::DNS_send(void* arg){
 
     while(1){
         Message* msg;
-        pipe_unit* read_pipe;
+        pipe_unit* read_pipe = new pipe_unit;
+
+        // For testing
+        cout << "Waiting for DNS message to send" << endl;
 
         // Wait for message to send
-        read(ppp->dns_send_pipe.pipe_d[0], (pipe_unit*) read_pipe, sizeof(pipe_unit));
+        read(ppp->dns_send_pipe.pipe_d[0], (pipe_unit*)read_pipe, sizeof(pipe_unit));
+
+        // For testing
+        cout << "DNS message read for sending" << endl;
+        cout << "Protocol ID test: " << read_pipe->protocol_id << endl;
 
         // Store message in variable
         msg = read_pipe->msg;
 
+        // For testing
+        cout << "DNS message stored in local var" << endl;
+
         // Create new header
         DNS_header* h = new DNS_header;
         h->m_size = msg->msgLen();
+
+        // For testing
+        cout << "DNS header created" << endl;
         
         // Add header to message
         msg->msgAddHdr((char*) h, sizeof(DNS_header));
+
+        // For testing
+        cout << "DNS header added to message" << endl;
 
         // Build new pipe unit
         pipe_unit send_pipe;
         send_pipe.protocol_id = 8;
         send_pipe.msg = msg;
 
+        // For testing
+        cout << "DNS pipe unit built" << endl;
+
         // Acquire mutex lock on pipe
         pthread_mutex_lock(ppp->udp_send_pipe.pipe_mutex);
+
+        // For testing
+        cout << "UDP send mutex lock aquired" << endl;
 
         // Write to eth send pipe
         write(ppp->udp_send_pipe.pipe_d[1], (char*) &send_pipe, sizeof(pipe_unit));
 
+        // For testing
+        cout << "DNS message written to UDP" << endl;
+
         // Remove mutex lock on pipe
         pthread_mutex_unlock(ppp->udp_send_pipe.pipe_mutex);
+
+        // For testing
+        cout << "UDP send mutex lock released" << endl;
     }
 }
 
@@ -896,7 +933,7 @@ void* PPP::DNS_recv(void* arg){
     
     while(1){
         Message* msg;
-        pipe_unit* read_pipe;
+        pipe_unit* read_pipe = new pipe_unit;
 
         read(ppp->dns_recv_pipe.pipe_d[0], (pipe_unit*) read_pipe, sizeof(pipe_unit));
 
