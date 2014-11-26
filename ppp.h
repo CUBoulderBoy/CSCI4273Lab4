@@ -62,6 +62,24 @@ private:
     pipes tcp_send_pipe, tcp_recv_pipe, udp_send_pipe, udp_recv_pipe;
     pipes ip_send_pipe, ip_recv_pipe, eth_send_pipe, eth_recv_pipe;
 
+    // Allocate mutex locks for pipes
+    pthread_mutex_t ftp_send_mut;
+    pthread_mutex_t ftp_recv_mut;
+    pthread_mutex_t tel_send_mut;
+    pthread_mutex_t tel_recv_mut;
+    pthread_mutex_t rdp_send_mut;
+    pthread_mutex_t rdp_recv_mut;
+    pthread_mutex_t dns_send_mut;
+    pthread_mutex_t dns_recv_mut;
+    pthread_mutex_t tcp_send_mut;
+    pthread_mutex_t tcp_recv_mut;
+    pthread_mutex_t udp_send_mut;
+    pthread_mutex_t udp_recv_mut;
+    pthread_mutex_t ip_send_mut;
+    pthread_mutex_t ip_recv_mut;
+    pthread_mutex_t eth_send_mut;
+    pthread_mutex_t eth_recv_mut;
+
     //Struct to store arguements for the resquester threads
     typedef struct {
         // Int for higher level protocol

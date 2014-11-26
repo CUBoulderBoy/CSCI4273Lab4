@@ -52,44 +52,44 @@ PPP::PPP(char in[], int out){
     cout << "Initializing mutex locks" << endl;
 
     // Initialize mutex locks on pipes
-    pthread_mutex_t ftp_send_mut = PTHREAD_MUTEX_INITIALIZER;
+    ftp_send_mut = PTHREAD_MUTEX_INITIALIZER;
     ftp_send_pipe.pipe_mutex = &ftp_send_mut;
-    pthread_mutex_t ftp_recv_mut = PTHREAD_MUTEX_INITIALIZER;
+    ftp_recv_mut = PTHREAD_MUTEX_INITIALIZER;
     ftp_recv_pipe.pipe_mutex = &ftp_recv_mut;
 
-    pthread_mutex_t tel_send_mut = PTHREAD_MUTEX_INITIALIZER;
+    tel_send_mut = PTHREAD_MUTEX_INITIALIZER;
     tel_send_pipe.pipe_mutex = &tel_send_mut;
-    pthread_mutex_t tel_recv_mut = PTHREAD_MUTEX_INITIALIZER;
+    tel_recv_mut = PTHREAD_MUTEX_INITIALIZER;
     tel_recv_pipe.pipe_mutex = &tel_recv_mut;
 
-    pthread_mutex_t rdp_send_mut = PTHREAD_MUTEX_INITIALIZER;
+    rdp_send_mut = PTHREAD_MUTEX_INITIALIZER;
     rdp_send_pipe.pipe_mutex = &rdp_send_mut;
-    pthread_mutex_t rdp_recv_mut = PTHREAD_MUTEX_INITIALIZER;
+    rdp_recv_mut = PTHREAD_MUTEX_INITIALIZER;
     rdp_recv_pipe.pipe_mutex = &rdp_recv_mut;
 
-    pthread_mutex_t dns_send_mut = PTHREAD_MUTEX_INITIALIZER;
+    dns_send_mut = PTHREAD_MUTEX_INITIALIZER;
     dns_send_pipe.pipe_mutex = &dns_send_mut;
-    pthread_mutex_t dns_recv_mut = PTHREAD_MUTEX_INITIALIZER;
+    dns_recv_mut = PTHREAD_MUTEX_INITIALIZER;
     dns_recv_pipe.pipe_mutex = &dns_recv_mut;
 
-    pthread_mutex_t tcp_send_mut = PTHREAD_MUTEX_INITIALIZER;
+    tcp_send_mut = PTHREAD_MUTEX_INITIALIZER;
     tcp_send_pipe.pipe_mutex = &tcp_send_mut;
-    pthread_mutex_t tcp_recv_mut = PTHREAD_MUTEX_INITIALIZER;
+    tcp_recv_mut = PTHREAD_MUTEX_INITIALIZER;
     tcp_recv_pipe.pipe_mutex = &tcp_recv_mut;
 
-    pthread_mutex_t udp_send_mut = PTHREAD_MUTEX_INITIALIZER;
+    udp_send_mut = PTHREAD_MUTEX_INITIALIZER;
     udp_send_pipe.pipe_mutex = &udp_send_mut;
-    pthread_mutex_t udp_recv_mut = PTHREAD_MUTEX_INITIALIZER;
+    udp_recv_mut = PTHREAD_MUTEX_INITIALIZER;
     udp_recv_pipe.pipe_mutex = &udp_recv_mut;
 
-    pthread_mutex_t ip_send_mut = PTHREAD_MUTEX_INITIALIZER;
+    ip_send_mut = PTHREAD_MUTEX_INITIALIZER;
     ip_send_pipe.pipe_mutex = &ip_send_mut;
-    pthread_mutex_t ip_recv_mut = PTHREAD_MUTEX_INITIALIZER;
+    ip_recv_mut = PTHREAD_MUTEX_INITIALIZER;
     ip_recv_pipe.pipe_mutex = &ip_recv_mut;
 
-    pthread_mutex_t eth_send_mut = PTHREAD_MUTEX_INITIALIZER;
+    eth_send_mut = PTHREAD_MUTEX_INITIALIZER;
     eth_send_pipe.pipe_mutex = &eth_send_mut;
-    pthread_mutex_t eth_recv_mut = PTHREAD_MUTEX_INITIALIZER;
+    eth_recv_mut = PTHREAD_MUTEX_INITIALIZER;
     eth_recv_pipe.pipe_mutex = &eth_recv_mut;
 
     // For testing
