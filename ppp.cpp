@@ -108,6 +108,13 @@ PPP::PPP(char in[], int out){
     // For testing
     cout << "Spooling up threads" << endl;
 
+    // start a thread for receiving messages
+    err = pthread_create(&tid_17, NULL, PPP::msg_recv, (void*) this);
+    if (err != 0) {
+        cout << "msg_recv() failed: " << err << endl;
+        exit(1);
+    }
+
     // start a thread for ethernet up
     err = pthread_create(&tid_1, NULL, PPP::eth_recv, (void*) this);
     if (err != 0) {
@@ -220,13 +227,6 @@ PPP::PPP(char in[], int out){
         exit(1);
     }
 
-    // start a thread for receiving messages
-    err = pthread_create(&tid_17, NULL, PPP::msg_recv, (void*) this);
-    if (err != 0) {
-        cout << "msg_recv() failed: " << err << endl;
-        exit(1);
-    }
-
     // For testing
     cout << "Threads all spooled up" << endl;
 }
@@ -277,12 +277,18 @@ void* PPP::msg_recv(void* arg)
         // Read message from socket
         n = recvfrom(ppp->recv_sock, msg_buf, 1024, 0, (struct sockaddr *)&cliaddr, &len);
         Message* msg = new Message(msg_buf, n);
+
+        // For testing
+        cout << "Message received on socket" << endl;
         
         // Acquire mutex lock on pipe
         pthread_mutex_lock(ppp->eth_recv_pipe.pipe_mutex);
 
         // Write to pipe
         write(ppp->eth_recv_pipe.pipe_d[1], msg, sizeof(msg));
+
+        // For testing
+        cout << "Socket message sent on pipe for processing" << endl;
 
         // Remove mutex lock on pipe
         pthread_mutex_unlock(ppp->eth_recv_pipe.pipe_mutex);
@@ -386,6 +392,9 @@ void* PPP::eth_send(void* arg){
 
         // Send out over network
         sendto(ppp->send_sock, msg_buf, msg->msgLen(), 0, (struct sockaddr *)&serv_sin, len);
+
+        // For testing
+        cout << "Message sent over network to peer" << endl;
     }
 
 
@@ -399,6 +408,9 @@ void* PPP::eth_recv(void* arg){
         pipe_unit* read_pipe = new pipe_unit;
 
         read(ppp->eth_recv_pipe.pipe_d[0], (pipe_unit*) read_pipe, sizeof(pipe_unit));
+
+        // For testing
+        cout << "Message read from receive pipe in eth recv" << endl;
 
         // Strip headers
         msg = read_pipe->msg;
