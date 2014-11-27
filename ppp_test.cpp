@@ -11,6 +11,11 @@ int main(){
 
     char* text = "This is a test";
     Message* msg = new Message(text, 14);
+
+    char* test = new char[1024];
+    msg->msgFlat(test);
+    cout << "Testing created message: " << test << endl;
+
     host_a.msg_send(msg, 8);
 
     while(1){
