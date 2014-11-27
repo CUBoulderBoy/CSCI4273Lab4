@@ -18,7 +18,7 @@ void ethernet_recv(void* msg)
 void* PPM::read_upd(void* arg)
 {
     PPM* ppm = (PPM*) arg;
-    char udp_portnum[6] = "32000";
+    char* udp_portnum = ppm->m_recv_port;
     int upd_sock = updSocket(udp_portnum);
     char mesg_buf[1024];
     struct sockaddr_in cliaddr;
@@ -36,9 +36,11 @@ void* PPM::read_upd(void* arg)
     }
 }
 
-PPM::PPM()
+PPM::PPM(char* send_port, char* recv_port)
 {
     m_thread_pool = new ThreadPool(25);
+    m_send_port = send_port;
+    m_recv_port = recv_port;
 
     // start a thread to listen to UPD (ethernet) messages
     pthread_t tid;
@@ -66,12 +68,11 @@ void PPM::ethernet_send(int protocol_id, Message* msg)
     memset(&servaddr, 0, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
 
-    char* port = "32000";
     char* host = "localhost";
 
     // Map port number (char string) to port number (int)
-    if ((servaddr.sin_port = htons((unsigned short)atoi(port))) == 0)
-        errexit("can't get \"%s\" port number\n", port);
+    if ((servaddr.sin_port = htons((unsigned short)atoi(m_send_port))) == 0)
+        errexit("can't get \"%s\" port number\n", m_send_port);
 
     // Map host name to IP address, allowing for dotted decimal
     if ( (phe = gethostbyname(host)) )

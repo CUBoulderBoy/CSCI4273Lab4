@@ -15,6 +15,8 @@ class PPM
 {
 public:
     PPM();
+    PPM(char* send_port, char* recv_port);
+
     ~PPM();
     void ethernet_send(int protocol_id, Message* msg);
     // void ethernet_recv(Message* msg);
@@ -38,8 +40,8 @@ public:
 private:
     ThreadPool* m_thread_pool;
     static void* read_upd(void* arg);
-
-
+    char* m_send_port;
+    char* m_recv_port;
 };
 
 #endif

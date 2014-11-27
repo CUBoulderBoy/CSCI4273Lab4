@@ -7,8 +7,8 @@
 using namespace std;
 
 int main(){
-    PPM host_a;
-    PPM host_b;
+    PPM host_a("32000", "32001");
+    PPM host_b("32001", "32000");
     // PPM host_b("32001", 32002);
 
     sleep(1);
