@@ -2,16 +2,20 @@
 #include <stdio.h>
 #include "ppm.h"
 #include "message.h"
+#include <unistd.h>
 
 using namespace std;
 
 int main(){
-    PPM host_a();
+    PPM host_a;
+    PPM host_b;
     // PPM host_b("32001", 32002);
 
-    // char* text = "This is a test";
-    // Message* msg = new Message(text, 14);
-    // host_a.msg_send(msg, 8);
+    sleep(1);
+
+    char* text = "This is a test";
+    Message* msg = new Message(text, 14);
+    host_a.ethernet_send(8, msg);
 
     while(1){
         continue;
