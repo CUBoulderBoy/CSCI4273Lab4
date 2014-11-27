@@ -8,6 +8,9 @@
 #include <string.h>
 #include <pthread.h>
 #include <stdlib.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
 
 using namespace std;
 
@@ -16,7 +19,7 @@ struct pipe_unit {
     Message *msg;
 };
 
-PPP::PPP(char in[], int out){
+PPP::PPP(char in[], char out[]){
     // Start communications on sockets first
     start_com(in, out);
 
@@ -243,9 +246,9 @@ PPP::~PPP()
  *
  * Int out takes an integer respresentation of the socket on the other client
  */
-void PPP::start_com(char in[], int out){
+void PPP::start_com(char in[], char out[]){
     recv_sock = updSocket(in);
-    send_sock = out;
+    m_send_port = out;
 
     // For testing
     cout << "Port Number Recevied: " << in << endl;
@@ -364,14 +367,36 @@ void PPP::msg_send(Message* msg, int protocol_id){
 void* PPP::eth_send(void* arg){
     PPP* ppp = (PPP*) arg;
     char msg_buf[1024];
-    struct sockaddr_in serv_sin;
+    struct sockaddr_in servaddr;
     socklen_t len;
+    struct hostent *phe;    // pointer to host information entry
+
+    memset(&servaddr, 0, sizeof(servaddr));
+    servaddr.sin_family = AF_INET;
+
+    char* host = "localhost";
+
+    // Map port number (char string) to port number (int)
+    if ((servaddr.sin_port = htons((unsigned short)atoi(ppp->m_send_port))) == 0)
+        errexit("can't get \"%s\" port number\n", ppp->m_send_port);
+
+    // Map host name to IP address, allowing for dotted decimal
+    if ( (phe = gethostbyname(host)) )
+    {
+        memcpy(&servaddr.sin_addr, phe->h_addr, phe->h_length);
+    }
+    else if ( (servaddr.sin_addr.s_addr = inet_addr(host)) == INADDR_NONE )
+        errexit("can't get \"%s\" host entry\n", host);
+
+    // Allocate a socket
+    int upd_sock = socket(AF_INET, SOCK_DGRAM, 0);
+    if (upd_sock < 0)
+        errexit("can't create socket: %s\n", strerror(errno));
     
     while(1){
         Message* msg;
         pipe_unit* read_pipe = new pipe_unit;
         memset(&msg_buf, 0, sizeof(msg_buf));
-        len = sizeof(serv_sin);
 
         // Wait until read succeeds
         read(ppp->eth_send_pipe.pipe_d[0], (pipe_unit*) read_pipe, sizeof(pipe_unit));
@@ -390,8 +415,11 @@ void* PPP::eth_send(void* arg){
         // Flaten message to buffer
         msg->msgFlat(msg_buf);
 
+        if (sendto(upd_sock, msg_buf, msg->msgLen(), 0, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0)
+        printf("Error with sendto %s\n", strerror(errno));
+
         // Send out over network
-        sendto(ppp->send_sock, msg_buf, msg->msgLen(), 0, (struct sockaddr *)&serv_sin, len);
+        //sendto(ppp->send_sock, msg_buf, msg->msgLen(), 0, (struct sockaddr *)&serv_sin, len);
 
         // For testing
         cout << "Message sent over network to peer" << endl;

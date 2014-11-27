@@ -17,11 +17,11 @@ typedef void (*function_pointer)(void*);
 class PPP
 {
 public:
-    PPP(char in[], int out);
+    PPP(char in[], char out[]);
     ~PPP();
     
     void msg_send(Message* msg, int protocol_id);
-    void start_com(char in[], int out);
+    void start_com(char in[], char[]);
 
 private:
     ThreadPool* m_thread_pool;
@@ -178,6 +178,9 @@ private:
 
     // Variable for storing the udp socket for the virtual network
     int recv_sock, send_sock;
+
+    char* m_send_port;
+    char* m_recv_port;
 };
 
 #endif
