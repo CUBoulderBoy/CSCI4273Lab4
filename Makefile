@@ -15,7 +15,7 @@ all: ppm_test ppp_test
 .cpp.o:
 	g++ -c $(CFLG) $<
 
-ppm_test:ppm_test.0
+ppm_test:ppm_test.o
 	$(CC) -o $@ $(CFLG) ppm.cpp ThreadPool.cpp Message.cpp $^ $(LIBS)
 
 ppp_test:ppp_test.o
