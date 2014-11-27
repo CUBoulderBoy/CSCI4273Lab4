@@ -282,8 +282,8 @@ void* PPP::msg_recv(void* arg)
         Message* msg = new Message(msg_buf, n);
 
         // For testing
-        cout << "Message received on socket: " << msg_buf << endl;
         cout << "size of mesage received on socket: " << n << endl;
+        printf("%s\n", msg_buf);
 
         // Build pipe unit
         pipe_unit send_pipe;
@@ -382,7 +382,6 @@ void PPP::msg_send(Message* msg, int protocol_id){
 
 void* PPP::eth_send(void* arg){
     PPP* ppp = (PPP*) arg;
-    char msg_buf[1024];
     struct sockaddr_in servaddr;
     socklen_t len;
     struct hostent *phe;    // pointer to host information entry
@@ -410,6 +409,7 @@ void* PPP::eth_send(void* arg){
         errexit("can't create socket: %s\n", strerror(errno));
     
     while(1){
+        char* msg_buf = new char[1024];
         Message* msg;
         pipe_unit* read_pipe = new pipe_unit;
         memset(&msg_buf, 0, sizeof(msg_buf));
@@ -456,7 +456,6 @@ void* PPP::eth_recv(void* arg){
 
         // For testing
         cout << "Message read from receive pipe in eth recv" << endl;
-        cout << "Lenth of message received in eth_recv: " << read_pipe->msg->msgLen() << endl;
 
         // Strip headers
         msg = read_pipe->msg;
