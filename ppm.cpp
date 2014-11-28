@@ -74,9 +74,7 @@ void PPM::ethernet_send(int protocol_id, Message* msg)
     struct hostent *phe;    // pointer to host information entry
 
     char* msg_buf = new char[1024];
-    // char msg_buf[1024];
 
-    // eth_header *h = (eth_header*) malloc( sizeof(eth_header));
     eth_header *h = new eth_header;
     h->hlp = protocol_id;
     h->m_size = msg->msgLen();
@@ -218,6 +216,7 @@ void PPM::FTP_recv(Message* msg)
     ftp_header* stripped = (ftp_header*)msg->msgStripHdr(sizeof(ftp_header));
     msg->msgFlat(buf);
     printf("ftp recieved message %s\n", buf);
+    delete msg;
 }
 
 void PPM::telnet_send(int protocol_id, Message* msg)
@@ -240,6 +239,7 @@ void PPM::telnet_recv(Message* msg)
     tel_header* stripped = (tel_header*)msg->msgStripHdr(sizeof(tel_header));
     msg->msgFlat(buf);
     printf("telnet recieved message %s\n", buf);
+    delete msg;
 }
 
 void PPM::RDP_send(int protocol_id, Message* msg)
@@ -262,6 +262,7 @@ void PPM::RDP_recv(Message* msg)
     RDP_header* stripped = (RDP_header*)msg->msgStripHdr(sizeof(RDP_header));
     msg->msgFlat(buf);
     printf("RDP recieved message %s\n", buf);
+    delete msg;
 }
 
 void PPM::DNS_send(int protocol_id, Message* msg)
@@ -284,4 +285,5 @@ void PPM::DNS_recv(Message* msg)
     DNS_header* stripped = (DNS_header*)msg->msgStripHdr(sizeof(DNS_header));
     msg->msgFlat(buf);
     printf("DNS recieved message %s\n", buf);
+    delete msg;
 }
