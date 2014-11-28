@@ -1,14 +1,19 @@
 #ifndef _PPP_
 #define _PPP_
 
-#include <mutex>
-#include <pthread.h>
 #include "message.h"
 #include "threadpool.h"
+
+#include <mutex>
+#include <pthread.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <iostream>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
 
 using namespace std;
 
