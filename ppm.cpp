@@ -8,7 +8,7 @@
 
 #include "updsocket.cpp"
 
-#define LOGGING 1
+#define LOGGING 0
 
 void PPM::ethernet_recv(void* arg)
 {
@@ -76,8 +76,8 @@ void PPM::ethernet_send(int protocol_id, Message* msg)
     char* msg_buf = new char[1024];
     // char msg_buf[1024];
 
-    eth_header *h = (eth_header*) malloc( sizeof(eth_header));
-    // eth_header *h = new eth_header;
+    // eth_header *h = (eth_header*) malloc( sizeof(eth_header));
+    eth_header *h = new eth_header;
     h->hlp = protocol_id;
     h->m_size = msg->msgLen();
 
@@ -110,19 +110,22 @@ void PPM::ethernet_send(int protocol_id, Message* msg)
         printf("Error with sendto %s\n", strerror(errno));
 
     delete[] msg_buf;
-    free(h);
+    delete msg;
+    delete h;
 }
 
 void PPM::IP_send(int protocol_id, Message* msg)
 {
     if (LOGGING) printf("IP send called\n");
 
-    IP_header *header = (IP_header *) malloc(sizeof(IP_header));
+    IP_header *header = new IP_header;
     header->hlp = protocol_id;
     header->m_size = msg->msgLen();
 
     msg->msgAddHdr((char *)header, sizeof(IP_header));
     ethernet_send(IP_ID, msg);
+
+    delete header;
 }
 
 void PPM::IP_recv(Message* msg)
@@ -143,12 +146,14 @@ void PPM::TCP_send(int protocol_id, Message* msg)
 {
     if (LOGGING) printf("TCP send called\n");
 
-    TCP_header *header = (TCP_header *) malloc(sizeof(TCP_header));
+    TCP_header *header = new TCP_header;
     header->hlp = protocol_id;
     header->m_size = msg->msgLen();
 
     msg->msgAddHdr((char *)header, sizeof(TCP_header));
     IP_send(TCP_ID, msg);
+
+    delete header;
 }
 
 void PPM::TCP_recv(Message* msg)
@@ -169,12 +174,14 @@ void PPM::UDP_send(int protocol_id, Message* msg)
 {
     if (LOGGING) printf("UDP_send called\n");
 
-    UDP_header *header = (UDP_header *) malloc(sizeof(UDP_header));
+    UDP_header *header = new UDP_header;
     header->hlp = protocol_id;
     header->m_size = msg->msgLen();
 
     msg->msgAddHdr((char *)header, sizeof(UDP_header));
     IP_send(UDP_ID, msg);
+
+    delete header;
 }
 
 void PPM::UDP_recv(Message* msg)
@@ -195,12 +202,14 @@ void PPM::FTP_send(int protocol_id, Message* msg)
 {
     if (LOGGING) printf("FTP_send called\n");
 
-    ftp_header *header = (ftp_header *) malloc(sizeof(ftp_header));
+    ftp_header *header = new ftp_header;
     header->hlp = protocol_id;
     header->m_size = msg->msgLen();
 
     msg->msgAddHdr((char *)header, sizeof(ftp_header));
     TCP_send(FTP_ID, msg);
+
+    delete header;
 }
 
 void PPM::FTP_recv(Message* msg)
@@ -215,12 +224,14 @@ void PPM::telnet_send(int protocol_id, Message* msg)
 {
     if (LOGGING) printf("telnet_send called\n");
 
-    tel_header *header = (tel_header *) malloc(sizeof(tel_header));
+    tel_header *header = new tel_header;
     header->hlp = protocol_id;
     header->m_size = msg->msgLen();
 
     msg->msgAddHdr((char *)header, sizeof(tel_header));
     TCP_send(TELNET_ID, msg);
+
+    delete header;
 }
 
 void PPM::telnet_recv(Message* msg)
@@ -233,12 +244,16 @@ void PPM::telnet_recv(Message* msg)
 
 void PPM::RDP_send(int protocol_id, Message* msg)
 {
-    RDP_header *header = (RDP_header *) malloc(sizeof(RDP_header));
+    if (LOGGING) printf("RDP_send called\n");
+
+    RDP_header *header = new RDP_header;
     header->hlp = protocol_id;
     header->m_size = msg->msgLen();
 
     msg->msgAddHdr((char *)header, sizeof(RDP_header));
     UDP_send(RDP_ID, msg);
+
+    delete header;
 }
 
 void PPM::RDP_recv(Message* msg)
@@ -251,12 +266,16 @@ void PPM::RDP_recv(Message* msg)
 
 void PPM::DNS_send(int protocol_id, Message* msg)
 {
-    ftp_header *header = (ftp_header *) malloc(sizeof(ftp_header));
+    if (LOGGING) printf("DNS_send called\n");
+
+    DNS_header *header = new DNS_header;
     header->hlp = protocol_id;
     header->m_size = msg->msgLen();
 
-    msg->msgAddHdr((char *)header, sizeof(ftp_header));
-    UDP_send(FTP_ID, msg);
+    msg->msgAddHdr((char *)header, sizeof(DNS_header));
+    UDP_send(DNS_ID, msg);
+
+    delete header;
 }
 
 void PPM::DNS_recv(Message* msg)
