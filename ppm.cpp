@@ -8,18 +8,22 @@
 
 #include "updsocket.cpp"
 
-void ethernet_recv(void* msg);
-
-void ethernet_recv(void* msg)
+void PPM::ethernet_recv(void* arg)
 {
+    printf("eth recv called\n");
+    char buf[1024];
+
+    Message* msg = (Message*) arg;
+    msg->msgFlat(buf);
+    printf("buf: %s\n", buf);
     eth_header* stripped = (eth_header*)msg->msgStripHdr(sizeof(eth_header));
     int protocol_id = stripped->hlp;
+    printf("header stripped\n");
     if (protocol_id == IP_ID)
         IP_recv(msg);
     else
         printf("Invalid protocol id %d in ethernet_recv\n", protocol_id);
 }
-
 
 void* PPM::read_upd(void* arg)
 {
@@ -38,7 +42,8 @@ void* PPM::read_upd(void* arg)
         printf("recved %d chars\n", n);
         printf("%s\n", mesg_buf);
         Message* msg = new Message(mesg_buf, n);
-        ppm->m_thread_pool->dispatch_thread(ethernet_recv, (void*) msg);
+        printf("%s\n", "msg created");
+        ppm->m_thread_pool->dispatch_thread(PPM::ethernet_recv, (void*) msg);
     }
 }
 
@@ -64,17 +69,23 @@ PPM::~PPM()
 
 void PPM::ethernet_send(int protocol_id, Message* msg)
 {
-    char msg_buf[1024];
     struct sockaddr_in servaddr;
     socklen_t len;
     struct hostent *phe;    // pointer to host information entry
+    char* msg_buf = new char[1024];
 
-    eth_header *header = (eth_header *) malloc(sizeof(eth_header));
-    header->hlp = protocol_id;
-    header->m_size = msg->msgLen();
+    eth_header *h = (eth_header*) malloc(sizeof(eth_header));
+    h->hlp = protocol_id;
+    h->m_size = msg->msgLen();
 
-    msg->msgAddHdr((char *)header, sizeof(eth_header));
+    printf("h protocol: %d\n", h->hlp);
+
+    msg->msgAddHdr((char*)h, sizeof(eth_header));
+    printf("msg len: %d\n", msg->msgLen());
+    // memset(&msg_buf, 0, sizeof(msg_buf));
     msg->msgFlat(msg_buf);
+
+    printf("msg flat: %c\n", msg_buf[1]);
 
     memset(&servaddr, 0, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
@@ -98,6 +109,7 @@ void PPM::ethernet_send(int protocol_id, Message* msg)
     if (upd_sock < 0)
         errexit("can't create socket: %s\n", strerror(errno));
 
+    printf("sending msg buf:\n%s\n", msg_buf);
     if (sendto(upd_sock, msg_buf, strlen(msg_buf), 0, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0)
         printf("Error with sendto %s\n", strerror(errno));
 }
