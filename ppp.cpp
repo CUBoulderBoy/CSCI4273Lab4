@@ -261,8 +261,8 @@ void PPP::start_com(char in[], char out[]){
  */
 void* PPP::msg_recv(void* arg)
 {
-    PPP* ppp = (PPP*) arg;
     char msg_buf[1024];
+    PPP* ppp = (PPP*) arg;
     struct sockaddr_in cliaddr;
     socklen_t len;
     int n;
@@ -284,13 +284,11 @@ void* PPP::msg_recv(void* arg)
         // For testing
         cout << "size of mesage received on socket: " << n << endl;
 
-        // Strip headers
-        eth_header* stripped = (eth_header*)msg->msgStripHdr(sizeof(eth_header));
-        int protocol_id = stripped->hlp;
-
         // For testing - Header stripping works here?!
-        cout << "Protocol ID stripped in eth header" << protocol_id << endl;
-        cout << "Message stripped in eth header" << stripped->m_size << endl;
+        //eth_header* stripped = (eth_header*)msg->msgStripHdr(sizeof(eth_header));
+        //int protocol_id = stripped->hlp;
+        //cout << "Protocol ID stripped in eth header" << protocol_id << endl;
+        //cout << "Message stripped in eth header" << stripped->m_size << endl;
 
         // Build pipe unit
         pipe_unit send_pipe;
