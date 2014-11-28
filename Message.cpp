@@ -218,8 +218,8 @@ void Message::msgFlat(char *buffer)
         c_len = (int)to_buff.front().second;
 
         // For testing
-        cout << "Current Node: " << c_node  << endl;
-        cout << "Current Node Length: " << c_len << endl;
+        //cout << "Current Node: " << c_node  << endl;
+        //cout << "Current Node Length: " << c_len << endl;
 
         //Assume that sufficient memory has been allocated in buffer
         memcpy(buffer+i, c_node, c_len);
