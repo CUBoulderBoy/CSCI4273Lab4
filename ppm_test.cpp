@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "ppm.h"
 #include "message.h"
+#include "protocolstructs.h"
 #include <unistd.h>
 
 using namespace std;
@@ -14,9 +15,10 @@ int main(){
     sleep(1);
 
     char* text = "This is a test";
-    Message* msg = new Message(text, 14);
-    host_a.ethernet_send(8, msg);
-
+    Message* msg1 = new Message(text, 14);
+    Message* msg2 = new Message(text, 14);
+    host_a.FTP_send(FTP_ID, msg1);
+    // host_b.telnet_send(TCP_ID, msg2);
     while(1){
         continue;
     }
