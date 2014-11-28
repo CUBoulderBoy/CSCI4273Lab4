@@ -1,4 +1,5 @@
 #include "ppm.h"
+#include "protocolstructs.h"
 #include <pthread.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -11,7 +12,12 @@ void ethernet_recv(void* msg);
 
 void ethernet_recv(void* msg)
 {
-
+    eth_header* stripped = (eth_header*)msg->msgStripHdr(sizeof(eth_header));
+    int protocol_id = stripped->hlp;
+    if (protocol_id == IP_ID)
+        IP_recv(msg);
+    else
+        printf("Invalid protocol id %d in ethernet_recv\n", protocol_id);
 }
 
 
@@ -63,6 +69,11 @@ void PPM::ethernet_send(int protocol_id, Message* msg)
     socklen_t len;
     struct hostent *phe;    // pointer to host information entry
 
+    eth_header *header = (eth_header *) malloc(sizeof(eth_header));
+    header->hlp = protocol_id;
+    header->m_size = msg->msgLen();
+
+    msg->msgAddHdr((char *)header, sizeof(eth_header));
     msg->msgFlat(msg_buf);
 
     memset(&servaddr, 0, sizeof(servaddr));
@@ -94,42 +105,82 @@ void PPM::ethernet_send(int protocol_id, Message* msg)
 // void PPM::ethernet_recv(Message* msg)
 // void PPM::ethernet_recv((void*) msg)
 // {
-
 // }
 
 void PPM::IP_send(int protocol_id, Message* msg)
 {
+    IP_header *header = (IP_header *) malloc(sizeof(IP_header));
+    header->hlp = protocol_id;
+    header->m_size = msg->msgLen();
 
+    msg->msgAddHdr((char *)header, sizeof(IP_header));
+    ethernet_send(IP_ID, msg);
 }
 
 void PPM::IP_recv(Message* msg)
 {
-
+    IP_header* stripped = (IP_header*)msg->msgStripHdr(sizeof(IP_header));
+    int protocol_id = stripped->hlp;
+    if (protocol_id == TCP_ID)
+        TCP_recv(msg);
+    else if (protocol_id == UDP_ID)
+        UDP_recv(msg);
+    else
+        printf("Invalid protocol id %d in IP_recv\n", protocol_id);
 }
 
 void PPM::TCP_send(int protocol_id, Message* msg)
 {
+    TCP_header *header = (TCP_header *) malloc(sizeof(TCP_header));
+    header->hlp = protocol_id;
+    header->m_size = msg->msgLen();
 
+    msg->msgAddHdr((char *)header, sizeof(TCP_header));
+    IP_send(TCP_ID, msg);
 }
 
 void PPM::TCP_recv(Message* msg)
 {
-
+    TCP_header* stripped = (TCP_header*)msg->msgStripHdr(sizeof(TCP_header));
+    int protocol_id = stripped->hlp;
+    if (protocol_id == FTP_ID)
+        FTP_recv(msg);
+    else if (protocol_id == TELNET_ID)
+        telnet_recv(msg);
+    else
+        printf("Invalid protocol id %d in TCP_recv\n", protocol_id);
 }
 
 void PPM::UDP_send(int protocol_id, Message* msg)
 {
+    UDP_header *header = (UDP_header *) malloc(sizeof(UDP_header));
+    header->hlp = protocol_id;
+    header->m_size = msg->msgLen();
 
+    msg->msgAddHdr((char *)header, sizeof(UDP_header));
+    IP_send(UDP_ID, msg);
 }
 
 void PPM::UDP_recv(Message* msg)
 {
-
+    UDP_header* stripped = (UDP_header*)msg->msgStripHdr(sizeof(UDP_header));
+    int protocol_id = stripped->hlp;
+    if (protocol_id == RDP_ID)
+        RDP_recv(msg);
+    else if (protocol_id == DNS_ID)
+        DNS_recv(msg);
+    else
+        printf("Invalid protocol id %d in UDP_recv\n", protocol_id);
 }
 
 void PPM::FTP_send(int protocol_id, Message* msg)
 {
+    ftp_header *header = (ftp_header *) malloc(sizeof(ftp_header));
+    header->hlp = protocol_id;
+    header->m_size = msg->msgLen();
 
+    msg->msgAddHdr((char *)header, sizeof(ftp_header));
+    TCP_send(FTP_ID, msg);
 }
 
 void PPM::FTP_recv(Message* msg)
@@ -139,7 +190,12 @@ void PPM::FTP_recv(Message* msg)
 
 void PPM::telnet_send(int protocol_id, Message* msg)
 {
+    tel_header *header = (tel_header *) malloc(sizeof(tel_header));
+    header->hlp = protocol_id;
+    header->m_size = msg->msgLen();
 
+    msg->msgAddHdr((char *)header, sizeof(tel_header));
+    TCP_send(TELNET_ID, msg);
 }
 
 void PPM::telnet_recv(Message* msg)
@@ -149,7 +205,12 @@ void PPM::telnet_recv(Message* msg)
 
 void PPM::RDP_send(int protocol_id, Message* msg)
 {
+    RDP_header *header = (RDP_header *) malloc(sizeof(RDP_header));
+    header->hlp = protocol_id;
+    header->m_size = msg->msgLen();
 
+    msg->msgAddHdr((char *)header, sizeof(RDP_header));
+    UDP_send(RDP_ID, msg);
 }
 
 void PPM::RDP_recv(Message* msg)
@@ -159,7 +220,12 @@ void PPM::RDP_recv(Message* msg)
 
 void PPM::DNS_send(int protocol_id, Message* msg)
 {
+    ftp_header *header = (ftp_header *) malloc(sizeof(ftp_header));
+    header->hlp = protocol_id;
+    header->m_size = msg->msgLen();
 
+    msg->msgAddHdr((char *)header, sizeof(ftp_header));
+    UDP_send(FTP_ID, msg);
 }
 
 void PPM::DNS_recv(Message* msg)
