@@ -283,7 +283,14 @@ void* PPP::msg_recv(void* arg)
 
         // For testing
         cout << "size of mesage received on socket: " << n << endl;
-        printf("%s\n", msg_buf);
+
+        // Strip headers
+        eth_header* stripped = (eth_header*)msg->msgStripHdr(sizeof(eth_header));
+        int protocol_id = stripped->hlp;
+
+        // For testing - Header stripping works here?!
+        cout << "Protocol ID stripped in eth header" << protocol_id << endl;
+        cout << "Message stripped in eth header" << stripped->m_size << endl;
 
         // Build pipe unit
         pipe_unit send_pipe;
@@ -430,10 +437,11 @@ void* PPP::eth_send(void* arg){
         msg->msgAddHdr((char*) h, sizeof(eth_header));
 
         // Flaten message to buffer
-        char* msg_buf = new char[1024];
+        char msg_buf[1024];
+        memset(&msg_buf, 0, sizeof(msg_buf));
         msg->msgFlat(msg_buf);
-        printf("%s\n", msg_buf);
 
+        // Sent message to network
         if (sendto(upd_sock, msg_buf, msg->msgLen(), 0, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0)
         printf("Error with sendto %s\n", strerror(errno));
 
@@ -539,7 +547,12 @@ void* PPP::IP_recv(void* arg){
         read(ppp->ip_recv_pipe.pipe_d[0], (char*) read_pipe, sizeof(pipe_unit));
 
         // Strip headers
-        msg = read_pipe->msg;
+        msg = read_pipe->msg;// Create new header
+        DNS_header* h = (DNS_header *) malloc( sizeof(DNS_header));
+        h->m_size = msg->msgLen();
+
+        // Add header to message
+        msg->msgAddHdr((char*) h, sizeof(DNS_header));
         IP_header* stripped = (IP_header*)msg->msgStripHdr(sizeof(IP_header));
         int protocol_id = stripped->hlp;
 

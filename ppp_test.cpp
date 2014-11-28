@@ -1,4 +1,5 @@
 #include "ppp.h"
+#include <iostream>
 
 using namespace std;
 
@@ -9,7 +10,7 @@ int main(){
     char* text = "This is a test";
     Message* msg = new Message(text, 14);
 
-    char* test = new char[1024];
+    char test[1024];
     msg->msgFlat(test);
     cout << "Testing created message: " << test << endl;
 
