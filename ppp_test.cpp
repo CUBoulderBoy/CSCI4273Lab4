@@ -1,5 +1,3 @@
-#include <iostream>
-#include <stdio.h>
 #include "ppp.h"
 
 using namespace std;
