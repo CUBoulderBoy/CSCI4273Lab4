@@ -29,19 +29,21 @@ void* PPM::read_upd(void* arg)
     PPM* ppm = (PPM*) arg;
     char* udp_portnum = ppm->m_recv_port;
     int upd_sock = updSocket(udp_portnum);
-    char msg_buf[1024];
 
     struct sockaddr_in cliaddr;
     socklen_t len;
     int n;
 
     while (1) {
-        memset(&msg_buf, 0, sizeof(msg_buf));
+        char* msg_buf = new char[1024]; // TODO fix memory leak
+        memset(msg_buf, 0, 1024);
+
         len = sizeof(cliaddr);
         n = recvfrom(upd_sock, msg_buf, 1024, 0, (struct sockaddr *)&cliaddr, &len);
         if (LOGGING) printf("read_UDP received %d chars\n", n);
         Message* msg = new Message(msg_buf, n);
         ppm->m_thread_pool->dispatch_thread(PPM::ethernet_recv, (void*) msg);
+        // delete[] msg_buf;
     }
 }
 
