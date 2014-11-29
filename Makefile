@@ -7,7 +7,7 @@ LIBS=-lpthread
 CC=g++
 
 # Main target
-all: ppm_test ppp_test
+all: ppm_test ppm_host ppp_test
 
 # Compile rules
 .c.o:
@@ -18,8 +18,11 @@ all: ppm_test ppp_test
 ppm_test:ppm_test.o
 	$(CC) -o $@ $(CFLG) ppm.cpp ThreadPool.cpp Message.cpp $^ $(LIBS)
 
+ppm_host:ppm_host.o
+	$(CC) -o $@ $(CFLG) ppm.cpp ThreadPool.cpp Message.cpp $^ $(LIBS)
+
 ppp_test:ppp_test.o
 	$(CC) -o $@ $(CFLG) ppp.cpp ThreadPool.cpp Message.cpp $^ $(LIBS)
 
 clean:
-	rm -f ppp_test ppm_test *.o *.a
+	rm -f ppp_test ppm_test ppm_host *.o *.a
