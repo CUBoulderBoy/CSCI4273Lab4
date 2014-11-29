@@ -304,7 +304,7 @@ void* PPP::msg_recv(void* arg)
         // For testing
         cout << "Socket message sent on pipe for processing" << endl;
 
-        // Remove mutex lock on pipe
+        // Remove mutex lock on write pipe
         pthread_mutex_unlock(ppp->eth_recv_pipe.pipe_mutex);
     }
 }
@@ -417,8 +417,14 @@ void* PPP::eth_send(void* arg){
         Message* msg;
         pipe_unit* read_pipe = new pipe_unit;
 
+        // Mutext unlock on read pipe
+        pthread_mutex_unlock(ppp->eth_send_pipe.pipe_mutex);
+
         // Wait until read succeeds
         read(ppp->eth_send_pipe.pipe_d[0], (char*) read_pipe, sizeof(pipe_unit));
+
+        // Mutext lock on read pipe to prevent race conditions
+        pthread_mutex_lock(ppp->eth_send_pipe.pipe_mutex);
 
         // Store message in variable
         msg = read_pipe->msg;
@@ -457,8 +463,14 @@ void* PPP::eth_recv(void* arg){
         Message* msg;
         pipe_unit* read_pipe = new pipe_unit;
 
+        // Mutext unlock on read pipe
+        pthread_mutex_unlock(ppp->eth_recv_pipe.pipe_mutex);
+
         // Wait to read message from pipe
         read(ppp->eth_recv_pipe.pipe_d[0], (char*) read_pipe, sizeof(pipe_unit));
+
+        // Mutext lock on read pipe to prevent race conditions
+        pthread_mutex_lock(ppp->eth_recv_pipe.pipe_mutex);
 
         // For testing
         //cout << "Message read from receive pipe in eth recv" << endl;
@@ -500,8 +512,14 @@ void* PPP::IP_send(void* arg){
         Message* msg;
         pipe_unit* read_pipe = new pipe_unit;
 
+        // Mutext unlock on read pipe
+        pthread_mutex_unlock(ppp->ip_send_pipe.pipe_mutex);
+
         // Wait for message to send
         read(ppp->ip_send_pipe.pipe_d[0], (char*) read_pipe, sizeof(pipe_unit));
+
+        // Mutext lock on read pipe to prevent race conditions
+        pthread_mutex_lock(ppp->ip_send_pipe.pipe_mutex);
 
         // Store message in variable
         msg = read_pipe->msg;
@@ -542,7 +560,14 @@ void* PPP::IP_recv(void* arg){
         Message* msg;
         pipe_unit* read_pipe = new pipe_unit;
 
+        // Mutext unlock on read pipe
+        pthread_mutex_unlock(ppp->ip_recv_pipe.pipe_mutex);
+
+        // Read from recv pipe
         read(ppp->ip_recv_pipe.pipe_d[0], (char*) read_pipe, sizeof(pipe_unit));
+
+        // Mutext lock on read pipe to prevent race conditions
+        pthread_mutex_lock(ppp->ip_recv_pipe.pipe_mutex);
 
         // Add header to message
         msg = read_pipe->msg;
@@ -587,8 +612,14 @@ void* PPP::TCP_send(void* arg){
         Message* msg;
         pipe_unit* read_pipe = new pipe_unit;
 
+        // Mutext unlock on read pipe
+        pthread_mutex_unlock(ppp->tcp_send_pipe.pipe_mutex);
+
         // Wait for message to send
         read(ppp->tcp_send_pipe.pipe_d[0], (char*) read_pipe, sizeof(pipe_unit));
+
+        // Mutext lock on read pipe to prevent race conditions
+        pthread_mutex_lock(ppp->tcp_send_pipe.pipe_mutex);
 
         // Store message in variable
         msg = read_pipe->msg;
@@ -624,7 +655,14 @@ void* PPP::TCP_recv(void* arg){
         Message* msg;
         pipe_unit* read_pipe = new pipe_unit;
 
+        // Mutext unlock on read pipe
+        pthread_mutex_unlock(ppp->tcp_recv_pipe.pipe_mutex);
+
+        // Read from recv pipe
         read(ppp->tcp_recv_pipe.pipe_d[0], (char*) read_pipe, sizeof(pipe_unit));
+
+        // Mutext lock on read pipe to prevent race conditions
+        pthread_mutex_lock(ppp->tcp_recv_pipe.pipe_mutex);
 
         // Strip headers
         msg = read_pipe->msg;
@@ -677,8 +715,14 @@ void* PPP::UDP_send(void* arg){
         Message* msg;
         pipe_unit* read_pipe = new pipe_unit;
 
+        // Mutext unlock on read pipe
+        pthread_mutex_unlock(ppp->udp_send_pipe.pipe_mutex);
+
         // Wait for message to send
         read(ppp->udp_send_pipe.pipe_d[0], (char*) read_pipe, sizeof(pipe_unit));
+
+        // Mutext lock on read pipe to prevent race conditions
+        pthread_mutex_lock(ppp->udp_send_pipe.pipe_mutex);
 
         // For testing
         //cout << "UDP message received to send" << endl;
@@ -728,7 +772,14 @@ void* PPP::UDP_recv(void* arg){
         Message* msg;
         pipe_unit* read_pipe = new pipe_unit;
 
+        // Mutext unlock on read pipe
+        pthread_mutex_unlock(ppp->udp_recv_pipe.pipe_mutex);
+
+        // Read from recv pipe
         read(ppp->udp_recv_pipe.pipe_d[0], (char*) read_pipe, sizeof(pipe_unit));
+
+        // Mutext lock on read pipe to prevent race conditions
+        pthread_mutex_lock(ppp->udp_recv_pipe.pipe_mutex);
 
         // Strip headers
         msg = read_pipe->msg;
@@ -778,8 +829,14 @@ void* PPP::FTP_send(void* arg){
         Message* msg;
         pipe_unit* read_pipe = new pipe_unit;
 
+        // Mutext unlock on read pipe
+        pthread_mutex_unlock(ppp->ftp_send_pipe.pipe_mutex);
+
         // Wait for message to send
         read(ppp->ftp_send_pipe.pipe_d[0], (char*) read_pipe, sizeof(pipe_unit));
+
+        // Mutext lock on read pipe to prevent race conditions
+        pthread_mutex_lock(ppp->ftp_send_pipe.pipe_mutex);
 
         // Store message in variable
         msg = read_pipe->msg;
@@ -814,7 +871,14 @@ void* PPP::FTP_recv(void* arg){
         Message* msg;
         pipe_unit* read_pipe = new pipe_unit;
 
+        // Mutext unlock on read pipe
+        pthread_mutex_unlock(ppp->ftp_recv_pipe.pipe_mutex);
+
+        // Read from recv pipe
         read(ppp->ftp_recv_pipe.pipe_d[0], (char*) read_pipe, sizeof(pipe_unit));
+
+        // Mutext lock on read pipe to prevent race conditions
+        pthread_mutex_lock(ppp->ftp_recv_pipe.pipe_mutex);
 
         // Strip headers
         msg = read_pipe->msg;
@@ -840,8 +904,14 @@ void* PPP::tel_send(void* arg){
         Message* msg;
         pipe_unit* read_pipe = new pipe_unit;
 
+        // Mutext unlock on read pipe
+        pthread_mutex_unlock(ppp->tel_send_pipe.pipe_mutex);
+
         // Wait for message to send
         read(ppp->tel_send_pipe.pipe_d[0], (char*) read_pipe, sizeof(pipe_unit));
+
+        // Mutext lock on read pipe to prevent race conditions
+        pthread_mutex_lock(ppp->tel_send_pipe.pipe_mutex);
 
         // Store message in variable
         msg = read_pipe->msg;
@@ -876,7 +946,14 @@ void* PPP::tel_recv(void* arg){
         Message* msg;
         pipe_unit* read_pipe = new pipe_unit;
 
+        // Mutext unlock on read pipe
+        pthread_mutex_unlock(ppp->tel_recv_pipe.pipe_mutex);
+
+        // Read from recv pipe
         read(ppp->tel_recv_pipe.pipe_d[0], (char*) read_pipe, sizeof(pipe_unit));
+
+        // Mutext lock on read pipe to prevent race conditions
+        pthread_mutex_lock(ppp->tel_recv_pipe.pipe_mutex);
 
         // Strip headers
         msg = read_pipe->msg;
@@ -902,8 +979,14 @@ void* PPP::RDP_send(void* arg){
         Message* msg;
         pipe_unit* read_pipe = new pipe_unit;
 
+        // Mutext unlock on read pipe
+        pthread_mutex_unlock(ppp->rdp_send_pipe.pipe_mutex);
+
         // Wait for message to send
         read(ppp->rdp_send_pipe.pipe_d[0], (char*) read_pipe, sizeof(pipe_unit));
+
+        // Mutext lock on read pipe to prevent race conditions
+        pthread_mutex_lock(ppp->rdp_send_pipe.pipe_mutex);
 
         // Store message in variable
         msg = read_pipe->msg;
@@ -938,7 +1021,14 @@ void* PPP::RDP_recv(void* arg){
         Message* msg;
         pipe_unit* read_pipe = new pipe_unit;
 
+        // Mutext unlock on read pipe
+        pthread_mutex_unlock(ppp->rdp_recv_pipe.pipe_mutex);
+
+        // Read from recv pip
         read(ppp->rdp_recv_pipe.pipe_d[0], (char*) read_pipe, sizeof(pipe_unit));
+
+        // Mutext lock on read pipe to prevent race conditions
+        pthread_mutex_lock(ppp->rdp_recv_pipe.pipe_mutex);
 
         // Strip headers
         msg = read_pipe->msg;
@@ -967,8 +1057,14 @@ void* PPP::DNS_send(void* arg){
         // For testing
         //cout << "Waiting for DNS message to send" << endl;
 
+        // Mutext unlock on read pipe
+        pthread_mutex_unlock(ppp->dns_send_pipe.pipe_mutex);
+
         // Wait for message to send
         read(ppp->dns_send_pipe.pipe_d[0], (char*)read_pipe, sizeof(pipe_unit));
+
+        // Mutext lock on read pipe to prevent race conditions
+        pthread_mutex_lock(ppp->dns_send_pipe.pipe_mutex);
 
         // For testing
         //cout << "Protocol ID test: " << read_pipe->protocol_id << endl;
@@ -1018,7 +1114,14 @@ void* PPP::DNS_recv(void* arg){
         Message* msg;
         pipe_unit* read_pipe = new pipe_unit;
 
+        // Mutext unlock on read pipe
+        pthread_mutex_unlock(ppp->dns_recv_pipe.pipe_mutex);
+
+        // Read from recv pipe
         read(ppp->dns_recv_pipe.pipe_d[0], (char*) read_pipe, sizeof(pipe_unit));
+
+        // Mutext lock on read pipe to prevent race conditions
+        pthread_mutex_lock(ppp->dns_recv_pipe.pipe_mutex);
 
         // Strip headers
         msg = read_pipe->msg;
