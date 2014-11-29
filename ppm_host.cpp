@@ -81,6 +81,7 @@ int main(int argc, char**argv)
     int err;
     pthread_t thread[4];
     PPM* ppm = new PPM(send_port, recv_port);
+    sleep(3);
 
     err = pthread_create(&thread[0], NULL, ftp_app, (void*) ppm);
     if (err != 0) {
@@ -110,6 +111,10 @@ int main(int argc, char**argv)
     pthread_join(thread[1], NULL);
     pthread_join(thread[2], NULL);
     pthread_join(thread[3], NULL);
+
+    while(1){
+        sleep(1);
+    }
 
     return 0;
 }
