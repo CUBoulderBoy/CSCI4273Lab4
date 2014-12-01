@@ -24,7 +24,7 @@ PPP::PPP(char in[], char out[]){
     start_com(in, out);
 
     // For testing
-    cout << "Building pipes" << endl;
+    //cout << "Building pipes" << endl;
 
     // Create pipes for threads
     pipe(ftp_send_pipe.pipe_d);
@@ -52,7 +52,7 @@ PPP::PPP(char in[], char out[]){
     pipe(ip_recv_pipe.pipe_d);
 
     // For testing
-    cout << "Initializing mutex locks" << endl;
+    //cout << "Initializing mutex locks" << endl;
 
     // Initialize mutex locks on pipes
     ftp_send_mut = PTHREAD_MUTEX_INITIALIZER;
@@ -96,7 +96,7 @@ PPP::PPP(char in[], char out[]){
     eth_recv_pipe.pipe_mutex = &eth_recv_mut;
 
     // For testing
-    cout << "Creating thread pool" << endl;
+    //cout << "Creating thread pool" << endl;
 
     // Create thread pool
     m_thread_pool = new ThreadPool(16);
@@ -109,7 +109,7 @@ PPP::PPP(char in[], char out[]){
     int err;
 
     // For testing
-    cout << "Spooling up threads" << endl;
+    //cout << "Spooling up threads" << endl;
 
     // start a thread for receiving messages
     err = pthread_create(&tid_17, NULL, PPP::msg_recv, (void*) this);
@@ -231,7 +231,7 @@ PPP::PPP(char in[], char out[]){
     }
 
     // For testing
-    cout << "Threads all spooled up" << endl;
+    //cout << "Threads all spooled up" << endl;
 }
 
 PPP::~PPP()
@@ -275,7 +275,7 @@ void* PPP::msg_recv(void* arg)
         len = sizeof(cliaddr);
 
         // For testing
-        cout << "Waiting for message" << endl;
+        //cout << "Waiting for message" << endl;
 
         // Read message from socket
         n = recvfrom(ppp->recv_sock, msg_buf, 1024, 0, (struct sockaddr *)&cliaddr, &len);
@@ -302,7 +302,7 @@ void* PPP::msg_recv(void* arg)
         write(ppp->eth_recv_pipe.pipe_d[1], (char*) &send_pipe, sizeof(pipe_unit));
 
         // For testing
-        cout << "Socket message sent on pipe for processing" << endl;
+        //cout << "Socket message sent on pipe for processing" << endl;
 
         // Remove mutex lock on write pipe
         pthread_mutex_unlock(ppp->eth_recv_pipe.pipe_mutex);
@@ -311,9 +311,9 @@ void* PPP::msg_recv(void* arg)
 
 void PPP::msg_send(Message* msg, int protocol_id){
     // For testing
-    char* test = new char[1024];
-    msg->msgFlat(test);
-    cout << "Message received for sending: " << test << endl;
+    //char* test = new char[1024];
+    //msg->msgFlat(test);
+    //cout << "Message received for sending: " << test << endl;
 
     if (protocol_id == 5) {
         pipe_unit ftp;
@@ -450,7 +450,7 @@ void* PPP::eth_send(void* arg){
         printf("Error with sendto %s\n", strerror(errno));
 
         // For testing
-        cout << "Message sent over network to peer" << endl;
+        //cout << "Message sent over network to peer" << endl;
     }
 
 

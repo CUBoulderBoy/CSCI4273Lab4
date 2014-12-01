@@ -22,11 +22,35 @@ typedef void (*function_pointer)(void*);
 class PPP
 {
 public:
+    // Struct for sending to pipes
+    struct pipe_unit {
+        int protocol_id;
+        Message *msg;
+    };
+
+    //Struct to store arguements for the resquester threads
+    typedef struct {
+        // Array for pipe descriptor
+        int pipe_d[2];
+     
+        //Pointer to mutex
+        pthread_mutex_t* pipe_mutex;
+    } pipes;
+
     PPP(char in[], char out[]);
     ~PPP();
     
     void msg_send(Message* msg, int protocol_id);
     void start_com(char in[], char[]);
+
+    // Allocate structs for application level pipes
+    pipes ftp_send_pipe, tel_send_pipe, rdp_send_pipe, dns_send_pipe;
+
+    // Mutext locks for application level send pipes
+    pthread_mutex_t ftp_send_mut;
+    pthread_mutex_t tel_send_mut;
+    pthread_mutex_t rdp_send_mut;
+    pthread_mutex_t dns_send_mut;
 
 private:
     ThreadPool* m_thread_pool;
@@ -52,29 +76,15 @@ private:
     // Functions for receiving messages
     static void* msg_recv(void* arg);
 
-    //Struct to store arguements for the resquester threads
-    typedef struct {
-        // Array for pipe descriptor
-        int pipe_d[2];
-     
-        //Pointer to mutex
-        pthread_mutex_t* pipe_mutex;
-    } pipes;
-
     // Allocate structs for pipes
-    pipes ftp_send_pipe, ftp_recv_pipe, tel_send_pipe, tel_recv_pipe;
-    pipes rdp_send_pipe, rdp_recv_pipe, dns_send_pipe, dns_recv_pipe;
+    pipes ftp_recv_pipe, tel_recv_pipe, rdp_recv_pipe, dns_recv_pipe;
     pipes tcp_send_pipe, tcp_recv_pipe, udp_send_pipe, udp_recv_pipe;
     pipes ip_send_pipe, ip_recv_pipe, eth_send_pipe, eth_recv_pipe;
 
     // Allocate mutex locks for pipes
-    pthread_mutex_t ftp_send_mut;
     pthread_mutex_t ftp_recv_mut;
-    pthread_mutex_t tel_send_mut;
     pthread_mutex_t tel_recv_mut;
-    pthread_mutex_t rdp_send_mut;
     pthread_mutex_t rdp_recv_mut;
-    pthread_mutex_t dns_send_mut;
     pthread_mutex_t dns_recv_mut;
     pthread_mutex_t tcp_send_mut;
     pthread_mutex_t tcp_recv_mut;

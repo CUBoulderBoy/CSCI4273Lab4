@@ -24,5 +24,8 @@ ppm_host:ppm_host.o
 ppp_test:ppp_test.o
 	$(CC) -o $@ $(CFLG) ppp.cpp ThreadPool.cpp Message.cpp $^ $(LIBS)
 
+ppp_host:ppp_host.o
+	$(CC) -o $@ $(CFLG) ppp.cpp ThreadPool.cpp Message.cpp $^ $(LIBS)
+
 clean:
-	rm -f ppp_test ppm_test ppm_host *.o *.a
+	rm -f ppp_test ppm_test ppm_host ppp_host *.o *.a
