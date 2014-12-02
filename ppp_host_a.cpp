@@ -4,7 +4,7 @@
 
 #define SLEEP_USEC 50
 
-char* msg_text = "The goal of this programming assignment is to evaluate two network implementation models.....\n";
+char* msg_text = "The goal of this programming assignment is to evaluate two network implementation models......\n";
 
 void* ftp_app(void* arg);
 void* telnet_app(void* arg);
