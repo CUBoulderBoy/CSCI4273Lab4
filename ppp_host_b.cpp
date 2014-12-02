@@ -1,8 +1,11 @@
 #include "ppp.h"
 #include "message.h"
 #include <unistd.h>
+#include <sys/time.h> 
 
-#define SLEEP_USEC 50
+#define SLEEP_USEC  50
+#define MSG_LEN    100
+#define NUM_MSG    100
 
 char* msg_text = "The goal of this programming assignment is to evaluate two network implementation models......\n";
 
@@ -132,6 +135,10 @@ int main(int argc, char**argv)
     PPP* ppp = new PPP(send_port, recv_port);
     sleep(5);
 
+    struct timeval tim;
+    gettimeofday(&tim, NULL);
+    double t1 = tim.tv_sec + (tim.tv_usec/1000000.0);
+
     err = pthread_create(&thread[0], NULL, ftp_app, (void*) ppp);
     if (err != 0) {
         cout << "pthread_create() failed: " << err << endl;
@@ -161,9 +168,14 @@ int main(int argc, char**argv)
     pthread_join(thread[2], NULL);
     pthread_join(thread[3], NULL);
 
-    while(1){
-        sleep(1);
+    while (1) {
+        if (ppp->m_num_recv >= 400)
+            break;
     }
+
+    gettimeofday(&tim, NULL);
+    double t3 = tim.tv_sec + (tim.tv_usec/1000000.0);
+    printf("%.6lf seconds elapsed for receiving the messages\n", t3 - t1);
 
     return 0;
 }

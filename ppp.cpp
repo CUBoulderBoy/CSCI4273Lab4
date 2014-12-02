@@ -894,6 +894,9 @@ void* PPP::FTP_recv(void* arg){
 
         // Clean up
         delete msg_buf;
+
+        // Update number of messages
+        ppp->m_num_recv++;
     }
 }
 
@@ -969,6 +972,9 @@ void* PPP::tel_recv(void* arg){
 
         // Clean up
         delete msg_buf;
+
+        // Update number of messages
+        ppp->m_num_recv++;
     }
 }
 
@@ -1044,6 +1050,9 @@ void* PPP::RDP_recv(void* arg){
 
         // Clean up
         delete msg_buf;
+
+        // Update number of messages
+        ppp->m_num_recv++;
     }
 }
 
@@ -1137,5 +1146,8 @@ void* PPP::DNS_recv(void* arg){
 
         // Clean up
         delete msg_buf;
+
+        // Update number of messages
+        ppp->m_num_recv++;
     }
 }

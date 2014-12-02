@@ -43,6 +43,11 @@ public:
     void msg_send(Message* msg, int protocol_id);
     void start_com(char in[], char[]);
 
+    // For tracking messages
+    int m_num_sent = 0;
+    int m_num_recv = 0;
+
+
     // Allocate structs for application level pipes
     pipes ftp_send_pipe, tel_send_pipe, rdp_send_pipe, dns_send_pipe;
 
