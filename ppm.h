@@ -2,7 +2,6 @@
 #define _PPM_
 
 #include <map>
-#include <semaphore.h>
 #include <string.h>
 #include <mutex>
 #include <iostream>
@@ -17,7 +16,7 @@ public:
     PPM();
     PPM(char* send_port, char* recv_port);
     ~PPM();
-    
+
     void ethernet_send(int protocol_id, Message* msg);
     static void ethernet_recv(void* arg);
     void IP_send(int protocol_id, Message* msg);
@@ -43,6 +42,7 @@ private:
     static void* read_upd(void* arg);
     char* m_send_port;
     char* m_recv_port;
+    std::mutex m_mutex;
 };
 
 #endif
