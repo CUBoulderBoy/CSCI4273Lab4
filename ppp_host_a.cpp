@@ -4,7 +4,7 @@
 
 #define SLEEP_USEC 50
 
-char* msg_text = "The goal of this programming......\n";
+char* msg_text = "The goal of this programming assignment is to evaluate two network implementation models.....\n";
 
 void* ftp_app(void* arg);
 void* telnet_app(void* arg);
@@ -130,8 +130,7 @@ int main(int argc, char**argv)
     int err;
     pthread_t thread[4];
     PPP* ppp = new PPP(send_port, recv_port);
-    PPP* ppp2 = new PPP(recv_port, send_port);
-    sleep(3);
+    sleep(5);
 
     err = pthread_create(&thread[0], NULL, ftp_app, (void*) ppp);
     if (err != 0) {

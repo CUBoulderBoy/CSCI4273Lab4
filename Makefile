@@ -7,7 +7,7 @@ LIBS=-lpthread
 CC=g++
 
 # Main target
-all: ppm_test ppm_host ppp_test
+all: ppm_host_a ppm_host_b ppp_host_a ppp_host_b
 
 # Compile rules
 .c.o:
@@ -18,14 +18,20 @@ all: ppm_test ppm_host ppp_test
 ppm_test:ppm_test.o
 	$(CC) -o $@ $(CFLG) ppm.cpp ThreadPool.cpp Message.cpp $^ $(LIBS)
 
-ppm_host:ppm_host.o
+ppm_host_a:ppm_host_a.o
+	$(CC) -o $@ $(CFLG) ppm.cpp ThreadPool.cpp Message.cpp $^ $(LIBS)
+
+ppm_host_b:ppm_host_b.o
 	$(CC) -o $@ $(CFLG) ppm.cpp ThreadPool.cpp Message.cpp $^ $(LIBS)
 
 ppp_test:ppp_test.o
 	$(CC) -o $@ $(CFLG) ppp.cpp ThreadPool.cpp Message.cpp $^ $(LIBS)
 
-ppp_host:ppp_host.o
+ppp_host_a:ppp_host_a.o
 	$(CC) -o $@ $(CFLG) ppp.cpp ThreadPool.cpp Message.cpp $^ $(LIBS)
 
+ppp_host_b:ppp_host_b.o
+	$(CC) -o $@ $(CFLG) ppp.cpp ThreadPool.cpp Message.cpp $^ $(LIBS)	
+
 clean:
-	rm -f ppp_test ppm_test ppm_host ppp_host *.o *.a
+	rm -f ppp_test ppm_test ppm_host_a ppm_host_b ppp_host_a ppp_host_b *.o *.a
