@@ -35,6 +35,9 @@ public:
     void DNS_send(int protocol_id, Message* msg);
     static void DNS_recv(Message* msg);
 
+    int m_num_sent = 0;
+    int m_num_recv = 0;
+
 private:
     ThreadPool* m_thread_pool;
     static void* read_upd(void* arg);

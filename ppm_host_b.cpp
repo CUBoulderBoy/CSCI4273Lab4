@@ -2,10 +2,13 @@
 #include "message.h"
 #include "protocolstructs.h"
 #include <unistd.h>
+#include <sys/time.h> 
 
-#define SLEEP_USEC 50
+#define SLEEP_USEC  50
+#define MSG_LEN    100
+#define NUM_MSG    100
 
-char* msg_text = "The goal of this programming assignment is to evaluate two network implementation models......\n";
+char* msg_text = "The goal of this programming assignment is to evaluate two network implementation models.....\n";
 
 void* ftp_app(void* arg);
 void* telnet_app(void* arg);
@@ -15,9 +18,9 @@ void* dns_app(void* arg);
 void* ftp_app(void* arg)
 {
     PPM* ppm = (PPM*) arg;
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < NUM_MSG; i++)
     {
-        Message* msg = new Message(msg_text, 100);
+        Message* msg = new Message(msg_text, MSG_LEN);
         ppm->FTP_send(FTP_ID, msg);
         usleep(SLEEP_USEC);
     }
@@ -26,9 +29,9 @@ void* ftp_app(void* arg)
 void* telnet_app(void* arg)
 {
     PPM* ppm = (PPM*) arg;
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < NUM_MSG; i++)
     {
-        Message* msg = new Message(msg_text, 100);
+        Message* msg = new Message(msg_text, MSG_LEN);
         ppm->telnet_send(TELNET_ID, msg);
         usleep(SLEEP_USEC);
     }
@@ -37,9 +40,9 @@ void* telnet_app(void* arg)
 void* rdp_app(void* arg)
 {
     PPM* ppm = (PPM*) arg;
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < NUM_MSG; i++)
     {
-        Message* msg = new Message(msg_text, 100);
+        Message* msg = new Message(msg_text, MSG_LEN);
         ppm->RDP_send(RDP_ID, msg);
         usleep(SLEEP_USEC);
     }
@@ -48,9 +51,9 @@ void* rdp_app(void* arg)
 void* dns_app(void* arg)
 {
     PPM* ppm = (PPM*) arg;
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < NUM_MSG; i++)
     {
-        Message* msg = new Message(msg_text, 100);
+        Message* msg = new Message(msg_text, MSG_LEN);
         ppm->DNS_send(DNS_ID, msg);
         usleep(SLEEP_USEC);
     }
@@ -81,7 +84,11 @@ int main(int argc, char**argv)
     int err;
     pthread_t thread[4];
     PPM* ppm = new PPM(send_port, recv_port);
-    sleep(5);
+    sleep(1);
+
+    struct timeval tim;
+    gettimeofday(&tim, NULL);
+    double t1 = tim.tv_sec + (tim.tv_usec/1000000.0);
 
     err = pthread_create(&thread[0], NULL, ftp_app, (void*) ppm);
     if (err != 0) {
@@ -112,9 +119,18 @@ int main(int argc, char**argv)
     pthread_join(thread[2], NULL);
     pthread_join(thread[3], NULL);
 
-    while(1){
-        sleep(1);
+    gettimeofday(&tim, NULL);
+    double t2 = tim.tv_sec + (tim.tv_usec/1000000.0);
+    printf("%.6lf seconds elapsed for sending the messages\n", t2 - t1);
+
+    while (1) {
+        if (ppm->m_num_recv >= 400)
+            break;
     }
+
+    gettimeofday(&tim, NULL);
+    double t3 = tim.tv_sec + (tim.tv_usec/1000000.0);
+    printf("%.6lf seconds elapsed for receiving the messages\n", t3 - t1);
 
     return 0;
 }

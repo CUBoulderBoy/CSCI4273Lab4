@@ -9,6 +9,7 @@
 #include "updsocket.cpp"
 
 #define LOGGING 0
+#define PRINT_MSG_RECV 0
 
 void PPM::ethernet_recv(void* arg)
 {
@@ -43,6 +44,7 @@ void* PPM::read_upd(void* arg)
         if (LOGGING) printf("read_UDP received %d chars\n", n);
         Message* msg = new Message(msg_buf, n);
         ppm->m_thread_pool->dispatch_thread(PPM::ethernet_recv, (void*) msg);
+        ppm->m_num_recv++;
         // delete[] msg_buf;
     }
 }
@@ -108,6 +110,8 @@ void PPM::ethernet_send(int protocol_id, Message* msg)
 
     if (sendto(upd_sock, msg_buf, msg->msgLen(), 0, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0)
         printf("Error with sendto %s\n", strerror(errno));
+
+    m_num_sent++;
 
     delete[] msg_buf;
     delete msg;
@@ -217,7 +221,7 @@ void PPM::FTP_recv(Message* msg)
     char buf[1024];
     ftp_header* stripped = (ftp_header*)msg->msgStripHdr(sizeof(ftp_header));
     msg->msgFlat(buf);
-    printf("ftp recieved message %s\n", buf);
+    if (PRINT_MSG_RECV) printf("ftp recieved message %s\n", buf);
     delete msg;
 }
 
@@ -240,7 +244,7 @@ void PPM::telnet_recv(Message* msg)
     char buf[1024];
     tel_header* stripped = (tel_header*)msg->msgStripHdr(sizeof(tel_header));
     msg->msgFlat(buf);
-    printf("telnet recieved message %s\n", buf);
+    if (PRINT_MSG_RECV) printf("telnet recieved message %s\n", buf);
     delete msg;
 }
 
@@ -263,7 +267,7 @@ void PPM::RDP_recv(Message* msg)
     char buf[1024];
     RDP_header* stripped = (RDP_header*)msg->msgStripHdr(sizeof(RDP_header));
     msg->msgFlat(buf);
-    printf("RDP recieved message %s\n", buf);
+    if (PRINT_MSG_RECV) printf("RDP recieved message %s\n", buf);
     delete msg;
 }
 
@@ -286,6 +290,6 @@ void PPM::DNS_recv(Message* msg)
     char buf[1024];
     DNS_header* stripped = (DNS_header*)msg->msgStripHdr(sizeof(DNS_header));
     msg->msgFlat(buf);
-    printf("DNS recieved message %s\n", buf);
+    if (PRINT_MSG_RECV) printf("DNS recieved message %s\n", buf);
     delete msg;
 }
