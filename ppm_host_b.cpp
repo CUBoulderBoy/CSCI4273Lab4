@@ -2,13 +2,17 @@
 #include "message.h"
 #include "protocolstructs.h"
 #include <unistd.h>
-#include <sys/time.h> 
+#include <sys/time.h>
 
 #define SLEEP_USEC  50
 #define MSG_LEN    100
 #define NUM_MSG    100
 
 char* msg_text = "The goal of this programming assignment is to evaluate two network implementation models.....\n";
+bool ftp_done = false;
+bool telnt_done = false;
+bool rdp_done = false;
+bool dns_done = false;
 
 void* ftp_app(void* arg);
 void* telnet_app(void* arg);
@@ -24,6 +28,7 @@ void* ftp_app(void* arg)
         ppm->FTP_send(FTP_ID, msg);
         usleep(SLEEP_USEC);
     }
+    ftp_done = true;
 }
 
 void* telnet_app(void* arg)
@@ -35,6 +40,7 @@ void* telnet_app(void* arg)
         ppm->telnet_send(TELNET_ID, msg);
         usleep(SLEEP_USEC);
     }
+    telnet_done = true;
 }
 
 void* rdp_app(void* arg)
@@ -46,6 +52,7 @@ void* rdp_app(void* arg)
         ppm->RDP_send(RDP_ID, msg);
         usleep(SLEEP_USEC);
     }
+    rdp_done = true;
 }
 
 void* dns_app(void* arg)
@@ -57,6 +64,7 @@ void* dns_app(void* arg)
         ppm->DNS_send(DNS_ID, msg);
         usleep(SLEEP_USEC);
     }
+    dns_done = true;
 }
 
 int main(int argc, char**argv)
@@ -68,7 +76,7 @@ int main(int argc, char**argv)
     {
     case 1:
         send_port = "32001";
-        recv_port = "32000";        
+        recv_port = "32000";
         break;
 
     case 3:
@@ -124,7 +132,7 @@ int main(int argc, char**argv)
     printf("%.6lf seconds elapsed for sending the messages\n", t2 - t1);
 
     while (1) {
-        if (ppm->m_num_recv >= 400)
+        if (ftp_done && telnt_done && rdp_done && dns_done)
             break;
     }
 
