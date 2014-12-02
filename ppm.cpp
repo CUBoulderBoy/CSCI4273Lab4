@@ -43,7 +43,7 @@ void* PPM::read_upd(void* arg)
         n = recvfrom(upd_sock, msg_buf, 1024, 0, (struct sockaddr *)&cliaddr, &len);
         if (LOGGING) printf("read_UDP received %d chars\n", n);
         Message* msg = new Message(msg_buf, n);
-        ppm->m_thread_pool->dispatch_thread(PPM::ethernet_recv, (void*) msg);
+        while (ppm->m_thread_pool->dispatch_thread(PPM::ethernet_recv, (void*) msg) < 0) {}
         ppm->m_num_recv++;
         // delete[] msg_buf;
     }
@@ -108,8 +108,10 @@ void PPM::ethernet_send(int protocol_id, Message* msg)
     if (upd_sock < 0)
         errexit("can't create socket: %s\n", strerror(errno));
 
+    m_mutex.lock();
     if (sendto(upd_sock, msg_buf, msg->msgLen(), 0, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0)
         printf("Error with sendto %s\n", strerror(errno));
+    m_mutex.unlock();
 
     m_num_sent++;
 

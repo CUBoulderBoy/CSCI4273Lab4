@@ -2,7 +2,7 @@
 #include "message.h"
 #include "protocolstructs.h"
 #include <unistd.h>
-#include <sys/time.h> 
+#include <sys/time.h>
 
 #define SLEEP_USEC  50
 #define MSG_LEN    100
@@ -68,7 +68,7 @@ int main(int argc, char**argv)
     {
     case 1:
         send_port = "32000";
-        recv_port = "32001";        
+        recv_port = "32001";
         break;
 
     case 3:
