@@ -8,6 +8,8 @@
 #define MSG_LEN    100
 #define NUM_MSG    100
 
+int m_num_recv;
+
 char* msg_text = "The goal of this programming assignment is to evaluate two network implementation models.....\n";
 
 void* ftp_app(void* arg);
@@ -82,6 +84,7 @@ int main(int argc, char**argv)
     }
 
     int err;
+    m_num_recv = 0;
     pthread_t thread[4];
     PPM* ppm = new PPM(send_port, recv_port);
     sleep(1);
@@ -124,7 +127,7 @@ int main(int argc, char**argv)
     printf("%.6lf seconds elapsed for sending the messages\n", t2 - t1);
 
     while (1) {
-        if (ppm->m_num_recv >= 400)
+        if (m_num_recv >= 400)
             break;
     }
 

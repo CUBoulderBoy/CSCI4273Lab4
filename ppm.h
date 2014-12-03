@@ -8,6 +8,8 @@
 #include "message.h"
 #include "threadpool.h"
 
+extern int m_num_recv;
+
 typedef void (*function_pointer)(void*);
 
 class PPM
@@ -35,7 +37,6 @@ public:
     static void DNS_recv(Message* msg);
 
     int m_num_sent = 0;
-    int m_num_recv = 0;
 
 private:
     ThreadPool* m_thread_pool;

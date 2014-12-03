@@ -11,6 +11,8 @@
 #define LOGGING 0
 #define PRINT_MSG_RECV 0
 
+extern int m_num_recv;
+
 void PPM::ethernet_recv(void* arg)
 {
     if (LOGGING) printf("eth recv called\n");
@@ -44,7 +46,7 @@ void* PPM::read_upd(void* arg)
         if (LOGGING) printf("read_UDP received %d chars\n", n);
         Message* msg = new Message(msg_buf, n);
         while (ppm->m_thread_pool->dispatch_thread(PPM::ethernet_recv, (void*) msg) < 0) {}
-        ppm->m_num_recv++;
+        //ppm->m_num_recv++;
         // delete[] msg_buf;
     }
 }
@@ -225,6 +227,7 @@ void PPM::FTP_recv(Message* msg)
     msg->msgFlat(buf);
     if (PRINT_MSG_RECV) printf("ftp recieved message %s\n", buf);
     delete msg;
+    m_num_recv++;
 }
 
 void PPM::telnet_send(int protocol_id, Message* msg)
@@ -248,6 +251,7 @@ void PPM::telnet_recv(Message* msg)
     msg->msgFlat(buf);
     if (PRINT_MSG_RECV) printf("telnet recieved message %s\n", buf);
     delete msg;
+    m_num_recv++;
 }
 
 void PPM::RDP_send(int protocol_id, Message* msg)
@@ -271,6 +275,7 @@ void PPM::RDP_recv(Message* msg)
     msg->msgFlat(buf);
     if (PRINT_MSG_RECV) printf("RDP recieved message %s\n", buf);
     delete msg;
+    m_num_recv++;
 }
 
 void PPM::DNS_send(int protocol_id, Message* msg)
@@ -294,4 +299,5 @@ void PPM::DNS_recv(Message* msg)
     msg->msgFlat(buf);
     if (PRINT_MSG_RECV) printf("DNS recieved message %s\n", buf);
     delete msg;
+    m_num_recv++;
 }
