@@ -1,18 +1,19 @@
 /*
- * CSCI 4273/5273 Message, Thread and Scheduler Libraries
+ * CSCI 4273/5273 PPM and PPP Testing
  *
  * Written by: Christopher Jordan and Aaron Davis
  *
  * Adapted from Code Written by: Shiv Mishra
  *
- * Last updated: November 7, 2014
+ * Last updated: December 2, 2014
  */
 
-To Build All: make
-To Build Message: make message
-To Build Thread: make threadpool
-To Build Scheduler: make eventscheduler
+To Build All: make all
 
-To Run Messge Test: ./message
-To Run Thread: ./thread
-To Run Scheduler: ./event
+To Run ppm_host_a: ./ppm_host_a
+To Run ppm_host_b: ./ppm_host_b
+To Run ppp_host_a: ./ppp_host_a
+To Run ppp_host_b: ./ppp_host_b
+
+To Test:
+Run one of the host a programs in one terminal and one of the host b programs in another terminal
