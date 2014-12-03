@@ -69,8 +69,8 @@ int main(int argc, char**argv)
     switch (argc)
     {
     case 1:
-        send_port = "32000";
-        recv_port = "32001";
+        send_port = "32001";
+        recv_port = "32000";
         break;
 
     case 3:

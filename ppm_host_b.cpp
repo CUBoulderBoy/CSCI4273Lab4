@@ -69,8 +69,8 @@ int main(int argc, char**argv)
     switch (argc)
     {
     case 1:
-        send_port = "32001";
-        recv_port = "32000";        
+        send_port = "32000";
+        recv_port = "32001";        
         break;
 
     case 3:
@@ -84,6 +84,7 @@ int main(int argc, char**argv)
     }
 
     int err;
+    m_num_recv = 0;
     pthread_t thread[4];
     PPM* ppm = new PPM(send_port, recv_port);
     sleep(1);
