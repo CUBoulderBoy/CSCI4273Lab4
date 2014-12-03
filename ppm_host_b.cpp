@@ -124,7 +124,6 @@ int main(int argc, char**argv)
 
     gettimeofday(&tim, NULL);
     double t2 = tim.tv_sec + (tim.tv_usec/1000000.0);
-    printf("%.6lf seconds elapsed for sending the messages\n", t2 - t1);
 
     while (1) {
         if (m_num_recv >= 400)
@@ -133,6 +132,8 @@ int main(int argc, char**argv)
 
     gettimeofday(&tim, NULL);
     double t3 = tim.tv_sec + (tim.tv_usec/1000000.0);
+
+    printf("%.6lf seconds elapsed for sending the messages\n", t2 - t1);
     printf("%.6lf seconds elapsed for receiving the messages\n", t3 - t1);
 
     return 0;

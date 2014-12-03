@@ -30,3 +30,48 @@ PPM Host A (hit enter first, so lag, use host B as baseline):
 
 PPP Host B:
 0.065810 seconds elapsed for receiving the messages
+
+
+TRIAL #2
+--------
+
+# ------------------- Testing with PPM and PPM -------------------------------
+
+PPM Host A Results (Enter first)
+0.079759 seconds elapsed for sending the messages
+0.291097 seconds elapsed for receiving the messages
+
+PPM Host B Results
+0.063528 seconds elapsed for sending the messages
+0.063537 seconds elapsed for receiving the messages
+
+
+# ------------------- Testing with PPP and PPP -------------------------------
+
+PPP Host A Results (Enter first)
+0.070499 seconds elapsed for sending the messages
+0.580775 seconds elapsed for receiving the messages
+
+PPP Host B Results
+0.104958 seconds elapsed for sending the messages
+0.104961 seconds elapsed for receiving the messages
+
+# ------------------- Testing with PPP and PPM -------------------------------
+
+PPP Host A Results (Enter first)
+0.072033 seconds elapsed for sending the messages
+0.619609 seconds elapsed for receiving the messages
+
+PPM Host B Results
+0.069787 seconds elapsed for sending the messages
+0.069790 seconds elapsed for receiving the messages
+
+# ------------------- Testing with PPM and PPP -------------------------------
+
+PPM Host A Results (Enter first)
+0.078131 seconds elapsed for sending the messages
+0.548531 seconds elapsed for receiving the messagesing the messages
+
+PPP Host B Results
+0.085263 seconds elapsed for sending the messages
+0.085265 seconds elapsed for receiving the messages

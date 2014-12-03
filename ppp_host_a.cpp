@@ -133,7 +133,7 @@ int main(int argc, char**argv)
     int err;
     pthread_t thread[4];
     PPP* ppp = new PPP(send_port, recv_port);
-    sleep(5);
+    sleep(1);
 
     struct timeval tim;
     gettimeofday(&tim, NULL);
@@ -168,6 +168,9 @@ int main(int argc, char**argv)
     pthread_join(thread[2], NULL);
     pthread_join(thread[3], NULL);
 
+    gettimeofday(&tim, NULL);
+    double t2 = tim.tv_sec + (tim.tv_usec/1000000.0);
+
     while (1) {
         if (ppp->m_num_recv >= 400)
             break;
@@ -175,6 +178,8 @@ int main(int argc, char**argv)
 
     gettimeofday(&tim, NULL);
     double t3 = tim.tv_sec + (tim.tv_usec/1000000.0);
+
+    printf("%.6lf seconds elapsed for sending the messages\n", t2 - t1);
     printf("%.6lf seconds elapsed for receiving the messages\n", t3 - t1);
 
     return 0;

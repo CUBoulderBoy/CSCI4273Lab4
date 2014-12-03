@@ -9,7 +9,7 @@
 #include "updsocket.cpp"
 
 #define LOGGING 0
-#define PRINT_MSG_RECV 0
+#define PRINT_MSG_RECV 1
 
 extern int m_num_recv;
 
