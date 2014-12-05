@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <sys/time.h> 
 
-#define SLEEP_USEC  50
+#define SLEEP_USEC  2
 #define MSG_LEN    100
 #define NUM_MSG    100
 

@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <sys/time.h>
 
-#define SLEEP_USEC  50
+#define SLEEP_USEC  2
 #define MSG_LEN    100
 #define NUM_MSG    100
 
@@ -87,7 +87,7 @@ int main(int argc, char**argv)
     m_num_recv = 0;
     pthread_t thread[4];
     PPM* ppm = new PPM(send_port, recv_port);
-    sleep(1);
+    sleep(10);
 
     struct timeval tim;
     gettimeofday(&tim, NULL);
